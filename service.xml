@@ -2,7 +2,7 @@
 <service xmlns="http://x.bmats.co/rest-service/2013.01"
          xmlns:rest="http://x.bmats.co/rest/2013.01"
          xmlns:meta="http://x.bmats.co/rest-meta/2013.01">
-    <meta:title>RestML Sample App</meta:title>
+    <meta:title>RestML Sample Service</meta:title>
     <meta:description>
         A simple service that demonstrates the capabilities of RestML
     </meta:description>
