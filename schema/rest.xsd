@@ -14,7 +14,8 @@
     <xs:complexType name="API">
         <xs:sequence>
             <xs:group ref="meta:About"/>
-            <xs:element name="resource" type="Resource" maxOccurs="unbounded"/>
+            <xs:element name="group" type="Group" maxOccurs="unbounded"/>
+            <xs:element name="model" type="Model" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attribute name="version" type="xs:token">
             <xs:annotation>
@@ -32,10 +33,53 @@
         </xs:attribute>
     </xs:complexType>
 
-    <xs:complexType name="Resource">
+    <xs:complexType name="Group">
         <xs:sequence>
             <xs:group ref="meta:About"/>
+            <xs:element name="resource" type="Resource" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="model" type="Model" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 
+    <xs:complexType name="Resource">
+        <xs:sequence>
+            <!-- meta:description -->
+            <xs:element name="action" type="Action" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="path" type="common:absolutePath" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="Action">
+        <xs:sequence>
+            <xs:group ref="meta:About"/>
+            <xs:element name="param" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="response" type="Response" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="method" type="common:httpMethod" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="Response">
+        <xs:sequence>
+            <!-- meta:description -->
+            <xs:element name="model" type="ModelRef" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="status" type="common:httpStatusCode" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="Model">
+        <xs:sequence>
+            <xs:element name="view" type="View" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:NCName" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="ModelRef">
+        <xs:attribute name="ref" type="xs:NCName" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="View">
+        <xs:sequence>
+        </xs:sequence>
+        <xs:attribute name="contentType" type="common:MIME" use="required"/>
+    </xs:complexType>
 </xs:schema>

@@ -19,4 +19,53 @@
             <xs:pattern value="https?://.*"/>
         </xs:restriction>
     </xs:simpleType>
+
+    <xs:simpleType name="absolutePath">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                An absolute (URI) path.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:anyURI">
+            <xs:pattern value="/([^/].*)?"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="httpMethod">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                HTTP request methods. Not exhaustive. Just the RESTy ones.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="GET"/>
+            <xs:enumeration value="POST"/>
+            <xs:enumeration value="PUT"/>
+            <xs:enumeration value="DELETE"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="httpStatusCode">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                HTTP status codes. Values of the form "YXX" are wildcards and
+                represent all valid codes in the range Y00 to Y99.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <!-- TODO individual status codes -->
+            <xs:enumeration value="1XX"/>
+            <xs:enumeration value="2XX"/>
+            <xs:enumeration value="3XX"/>
+            <xs:enumeration value="4XX"/>
+            <xs:enumeration value="5XX"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="MIME">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\w+/\w+"/>
+        </xs:restriction>
+    </xs:simpleType>
+
 </xs:schema>

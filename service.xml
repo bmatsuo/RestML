@@ -10,13 +10,25 @@
     <meta:terms href="http://bmats.co"/>
     <rest:api baseUrl="http://meme.bmats.co" version="2.29.5-E">
         <meta:title>Memes</meta:title>
-        <rest:resource>
+        <rest:group>
             <meta:title>Cats</meta:title>
             <meta:subtitle>u can haz</meta:subtitle>
-        </rest:resource>
-        <rest:resource>
+            <rest:resource path="/foo">
+                <rest:action method="GET">
+                    <meta:title>Find a foo by its ID</meta:title>
+                    <rest:response status="2XX">
+                        <rest:model ref="ok"/>
+                    </rest:response>
+                </rest:action>
+            </rest:resource>
+            <rest:resource path="/bar"/>
+        </rest:group>
+        <rest:group>
             <meta:title>Kids</meta:title>
             <meta:subtitle>SUCCESS!</meta:subtitle>
-        </rest:resource>
+        </rest:group>
+        <rest:model name="ok">
+            <rest:view contentType="application/json"/>
+        </rest:model>
     </rest:api>
 </service>
