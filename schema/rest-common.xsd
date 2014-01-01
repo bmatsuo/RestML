@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="http://x.bmats.co/rest-common/2013.01"
+           targetNamespace="http://x.bmats.co/rest-common/2013.01"
+           elementFormDefault="qualified">
+    <xs:simpleType name="text">
+        <xs:restriction base="xs:string">
+            <xs:whiteSpace value="collapse"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="httpURI">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                A URI with an HTTP(S) scheme.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:anyURI">
+            <xs:pattern value="https?://.*"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

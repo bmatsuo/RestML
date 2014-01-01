@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:common="http://x.bmats.co/rest-common/2013.01"
+           xmlns="http://x.bmats.co/rest/2013.01"
+           targetNamespace="http://x.bmats.co/rest/2013.01"
+           elementFormDefault="qualified">
+
+    <xs:import namespace="http://x.bmats.co/rest-common/2013.01" schemaLocation="rest-common.xsd"/>
+
+    <xs:element name="api" type="API"/>
+
+    <xs:complexType name="API">
+        <xs:sequence>
+            <xs:element name="title" type="common:text"/>
+            <xs:element name="subtitle" type="common:text" minOccurs="0"/>
+            <xs:element name="resource" type="Resource" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="version" type="xs:token">
+            <xs:annotation>
+                <xs:documentation>
+                    The service API version.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="baseUrl" type="xs:token">
+            <xs:annotation>
+                <xs:documentation>
+                    The base (absolute) URL shared by all resources in the API.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="Resource">
+        <xs:sequence>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

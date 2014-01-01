@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service xmlns="http://x.bmats.co/rest-service/2013.01"
+         xmlns:rest="http://x.bmats.co/rest/2013.01">
+    <title>RestML Sample App</title>
+    <description>
+        A simple service that demonstrates the capabilities of RestML
+    </description>
+    <rest:api>
+        <rest:title></rest:title>
+        <rest:resource/>
+    </rest:api>
+</service>
