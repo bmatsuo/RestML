@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:common="http://x.bmats.co/rest-common/2013.01"
+           xmlns="http://x.bmats.co/rest-meta/2013.01"
+           targetNamespace="http://x.bmats.co/rest-meta/2013.01"
+           elementFormDefault="qualified">
+
+    <xs:import namespace="http://x.bmats.co/rest-common/2013.01" schemaLocation="rest-common.xsd"/>
+
+    <xs:group name="About">
+        <xs:sequence>
+            <xs:element name="title" type="common:text"/>
+            <xs:element name="subtitle" type="common:text" minOccurs="0"/>
+            <xs:element name="description" type="common:text" minOccurs="0"/>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:group name="Legal">
+        <xs:sequence>
+            <xs:element name="license" type="License" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="terms" type="TermsOfService" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:complexType name="TermsOfService">
+        <xs:attribute name="href" type="common:httpURI">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    A browser-resolvable reference to (additional) terms of service in a human-readable
+                    representation.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="License">
+        <xs:attribute name="type" type="xs:token" use="required">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    For example, "Apache 2.0".
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="href" type="common:httpURI">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    A browser-resolvable reference to an (additional) license agreement in a human-readable
+                    representation.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+</xs:schema>

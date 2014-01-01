@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service xmlns="http://x.bmats.co/rest-service/2013.01"
+         xmlns:rest="http://x.bmats.co/rest/2013.01"
+         xmlns:meta="http://x.bmats.co/rest-meta/2013.01">
+    <meta:title>RestML Sample App</meta:title>
+    <meta:description>
+        A simple service that demonstrates the capabilities of RestML
+    </meta:description>
+    <meta:license type="Apache 2.0" href="http://www.apache.org/licenses/LICENSE-2.0.html"/>
+    <meta:terms href="http://bmats.co"/>
+    <rest:api baseUrl="http://meme.bmats.co" version="2.29.5-E">
+        <meta:title>Memes</meta:title>
+        <rest:resource>
+            <meta:title>Cats</meta:title>
+            <meta:subtitle>u can haz</meta:subtitle>
+        </rest:resource>
+        <rest:resource>
+            <meta:title>Kids</meta:title>
+            <meta:subtitle>SUCCESS!</meta:subtitle>
+        </rest:resource>
+    </rest:api>
+</service>

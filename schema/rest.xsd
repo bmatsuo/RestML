@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:meta="http://x.bmats.co/rest-meta/2013.01"
            xmlns:common="http://x.bmats.co/rest-common/2013.01"
            xmlns="http://x.bmats.co/rest/2013.01"
            targetNamespace="http://x.bmats.co/rest/2013.01"
            elementFormDefault="qualified">
 
     <xs:import namespace="http://x.bmats.co/rest-common/2013.01" schemaLocation="rest-common.xsd"/>
+    <xs:import namespace="http://x.bmats.co/rest-meta/2013.01" schemaLocation="rest-meta.xsd"/>
 
     <xs:element name="api" type="API"/>
 
     <xs:complexType name="API">
         <xs:sequence>
-            <xs:element name="title" type="common:text"/>
-            <xs:element name="subtitle" type="common:text" minOccurs="0"/>
+            <xs:group ref="meta:About"/>
             <xs:element name="resource" type="Resource" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attribute name="version" type="xs:token">
@@ -33,6 +34,7 @@
 
     <xs:complexType name="Resource">
         <xs:sequence>
+            <xs:group ref="meta:About"/>
         </xs:sequence>
     </xs:complexType>
 

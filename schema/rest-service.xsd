@@ -2,12 +2,14 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:rest="http://x.bmats.co/rest/2013.01"
            xmlns:common="http://x.bmats.co/rest-common/2013.01"
+           xmlns:meta="http://x.bmats.co/rest-meta/2013.01"
            xmlns="http://x.bmats.co/rest-service/2013.01"
            targetNamespace="http://x.bmats.co/rest-service/2013.01"
            elementFormDefault="qualified">
 
     <xs:import namespace="http://x.bmats.co/rest/2013.01" schemaLocation="rest.xsd"/>
     <xs:import namespace="http://x.bmats.co/rest-common/2013.01" schemaLocation="rest-common.xsd"/>
+    <xs:import namespace="http://x.bmats.co/rest-meta/2013.01" schemaLocation="rest-meta.xsd"/>
 
     <xs:element name="service" type="Service">
         <xs:annotation>
@@ -24,34 +26,8 @@
             </xs:documentation>
         </xs:annotation>
         <xs:sequence>
-            <xs:element name="title" type="common:text">
-                <xs:annotation>
-                    <xs:documentation xml:lang="en">
-                        The official name of the service.
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:element name="description" type="common:text">
-                <xs:annotation>
-                    <xs:documentation xml:lang="en">
-                        A brief, high-level description of the service.
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:element name="license" minOccurs="0" maxOccurs="unbounded">
-                <xs:annotation>
-                    <xs:documentation xml:lang="en">
-                        Any license applicable to the service/API.
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:element name="terms" type="TermsOfService" minOccurs="0" maxOccurs="unbounded">
-                <xs:annotation>
-                    <xs:documentation xml:lang="en">
-                        Terms of service and other legal agreements for the service.
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:element>
+            <xs:group ref="meta:About"/>
+            <xs:group ref="meta:Legal"/>
             <xs:element ref="rest:api">
                 <xs:annotation>
                     <xs:documentation xml:lang="en">
