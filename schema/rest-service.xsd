@@ -28,7 +28,7 @@
         <xs:sequence>
             <xs:group ref="meta:About"/>
             <xs:group ref="meta:Legal"/>
-            <xs:element ref="rest:api">
+            <xs:element ref="rest:api" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation xml:lang="en">
                         The service's REST HTTP interface.

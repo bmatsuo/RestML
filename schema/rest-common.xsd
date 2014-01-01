@@ -63,8 +63,8 @@
     </xs:simpleType>
 
     <xs:simpleType name="MIME">
-        <xs:restriction base="xs:string">
-            <xs:pattern value="\w+/\w+"/>
+        <xs:restriction base="xs:token">
+            <xs:pattern value="[^ /]+/[^ /]+"/>
         </xs:restriction>
     </xs:simpleType>
 

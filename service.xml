@@ -7,7 +7,7 @@
         A simple service that demonstrates the capabilities of RestML
     </meta:description>
     <meta:license type="Apache 2.0" href="http://www.apache.org/licenses/LICENSE-2.0.html"/>
-    <meta:terms href="http://bmats.co"/>
+    <meta:terms href="http://bmats.co/terms"/>
     <rest:api baseUrl="http://meme.bmats.co" version="2.29.5-E">
         <meta:title>Memes</meta:title>
         <rest:group>
@@ -27,8 +27,39 @@
             <meta:title>Kids</meta:title>
             <meta:subtitle>SUCCESS!</meta:subtitle>
         </rest:group>
-        <rest:model name="ok">
+        <rest:model id="ok">
+            <meta:title>A generic successful response</meta:title>
+            <rest:view contentType="text/plain"/>
+            <rest:view contentType="text/xml"/>
             <rest:view contentType="application/json"/>
+        </rest:model>
+    </rest:api>
+    <rest:api baseUrl="http://fail.bmats.co" version="5.14.3-9">
+        <meta:title>Fails</meta:title>
+        <rest:group>
+            <meta:title>Epic</meta:title>
+            <meta:subtitle>ZOMFG!!1!</meta:subtitle>
+            <rest:resource path="/epic">
+                <rest:action method="GET">
+                    <meta:title>Find an epic fail</meta:title>
+                    <rest:response status="2XX">
+                        <rest:model ref="fail"/>
+                    </rest:response>
+                </rest:action>
+                <rest:action method="POST">
+                    <meta:title>Upload an epic fail</meta:title>
+                    <rest:param/>
+                    <rest:response status="3XX">
+                    </rest:response>
+                </rest:action>
+            </rest:resource>
+        </rest:group>
+        <rest:model id="fail">
+            <meta:title>Faily Fail MacFailery</meta:title>
+            <rest:view contentType="image/png"/>
+            <rest:view contentType="image/jpg"/>
+            <rest:view contentType="image/gif"/>
+            <rest:view contentType="video/mpeg-4"/>
         </rest:model>
     </rest:api>
 </service>
