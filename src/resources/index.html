@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html ng-app="restApp" ng-controller="restController">
+    <head>
+        <title ng-bind="title"></title>
+        <script type="text/javascript" src="javascript/angular-1.2.6/angular.js"></script>
+        <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css"/>
+    </head>
+    <body>
+    <div class="container">
+        <rest-select src="'/service.xml'" on-select="selected(serviceUrl)"></rest-select>
+
+        <rest src="src" on-load="serviceLoaded(service)">
+            <h1>{{title}} <small>{{subtitle}}</small></h1>
+            <p>{{description}}</p>
+
+            <div ng-repeat="api in apis" spec="api">
+                <h3>{{api.title}} <small>{{api.subtitle}}</small></h3>
+                <p>{{api.description}}</p>
+
+                <div ng-repeat="group in api.groups">
+                    <h3>{{group.title}} <small>{{group.subtitle}}</small></h3>
+                    <p>{{group.description}}</p>
+
+                    <div ng-repeat="resource in group.resources">
+                        <rest-action ng-repeat="action in resource.actions" resource="resource" action="action">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <div class="row">
+                                        <span class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
+                                            <strong>{{action.method}}</strong>
+                                        </span>
+                                        <span class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                            <strong>{{resource.path}}</strong>
+                                        </span>
+                                        <span class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                                            {{action.title}}
+                                        </span>
+                                    </div>
+                                </div>
+                                <table class="table table-hover">
+                                    <tr ng-repeat="param in action.params" class="form-group">
+                                        <td class="col-lg-1 col-md-1 col-sm-1 col-xs-1" ng-class="{'text-muted': !param.required}">
+                                            <label for="resource_{{resource.nickname}}-{{action.method}}-param_{{param.name}}" class="control-label">
+                                                {{param.name}}
+                                            </label>
+                                        </td>
+                                        <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                                            <input name="{{param.name}}" type="text" id="resource_{{resource.nickname}}-{{action.method}}-param_{{param.name}}">
+                                        </td>
+                                        <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" ng-class="{'text-muted': !param.required}">
+                                            {{param.type}}
+                                        </td>
+                                        <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" ng-class="{'text-muted': !param.required}">
+                                            <span ng-hide="param.required">
+                                                (optional)
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <div class="panel-body">
+                                    <div class="form-group">
+                                        <div>
+                                            <label for="accept" class="col-sm-2 control-label">Accept</label>
+                                        </div>
+                                        <div class="col-sm-10">
+                                            <select id="accept" class="form-control" name="rest-accept-type">
+                                                <option value="application/json">application/json</option>
+                                                <option value="text/xml">text/xml</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="panel-body">
+                                    <h4>Responses:</h4>
+                                    <div ng-repeat="response in action.responses" class="response">
+                                        <div class="row status">
+                                            <strong>
+                                                <span class="col-lg-1 col-md-1 col-sm-1 col-xs-1">{{response.statusCode}}</span>
+                                                <span class="col-lg-2 col-md-2 col-sm-2 col-xs-2">{{response.status}}</span>
+                                            </strong>
+                                        </div>
+
+                                        <div ng-repeat="model in response.models" class="model">
+                                            <div class="row">
+                                                <strong>
+                                                    <span class="col-lg-2 col-md-2 col-sm-2 col-xs-2">{{model.title}} <small>{{model.subtitle}}</small></span>
+                                                </strong>
+                                                <span class="col-lg-10 col-md-10 col-sm-10 col-xs-10">{{model.description}}</span>
+                                            </div>
+                                            <!--rest-model spec="model">Schema...</rest-model-->
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="panel-body">
+                                    <button type="submit" class="btn btn-primary">Try it out!</button>
+                                </div>
+                            </div>
+                        </rest-action>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer legal">
+                <div class="license-list">
+                    <p ng-repeat="license in licenses">
+                        This work except where otherwise noted is licensed through {{license.type}}.
+                        Terms of this license can be found <a href="license.href">here</a>.
+                    </p>
+                </div>
+                <div class="term-list">
+                    <p ng-repeat="t in terms">
+                        By using these APIs you agree to the <a href="t.href">{{t.name}}</a>.
+                    </p>
+                </div>
+            </div>
+        </rest>
+    </div>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery.js"></script>
+    <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript" src="javascript/underscore-min.js"></script>
+
+    <!-- TODO this should be loaded dynamically -->
+    <script type="text/javascript" src="javascript/xml_for_script-3.1/jsXMLParser/xmlw3cdom.js"></script>
+    <script type="text/javascript" src="javascript/xml_for_script-3.1/jsXMLParser/xmlsax.js"></script>
+    <!-- TODO END -->
+
+    <script type="text/javascript" src="javascript/rest/restml.js"></script>
+    <script type="text/javascript" src="javascript/rest/app.js"></script>
+    </body>
+</html>
