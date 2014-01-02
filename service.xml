@@ -4,7 +4,7 @@
          xmlns:meta="http://x.bmats.co/rest-meta/2013.01">
     <meta:title>RestML Sample Service</meta:title>
     <meta:description>
-        A simple service that demonstrates the capabilities of RestML
+        A simple service that demonstrates the capabilities of RestML.
     </meta:description>
     <meta:license type="Apache 2.0" href="http://www.apache.org/licenses/LICENSE-2.0.html"/>
     <meta:terms href="http://bmats.co/terms"/>
@@ -28,7 +28,8 @@
             <meta:subtitle>SUCCESS!</meta:subtitle>
         </rest:group>
         <rest:model id="ok">
-            <meta:title>A generic successful response</meta:title>
+            <meta:title>OK</meta:title>
+            <meta:description>A generic success message with no extra information.</meta:description>
             <rest:view contentType="text/plain"/>
             <rest:view contentType="text/xml"/>
             <rest:view contentType="application/json"/>
@@ -56,6 +57,7 @@
         </rest:group>
         <rest:model id="fail">
             <meta:title>Faily Fail MacFailery</meta:title>
+            <meta:description>A funny video or picture of people failing.</meta:description>
             <rest:view contentType="image/png"/>
             <rest:view contentType="image/jpg"/>
             <rest:view contentType="image/gif"/>
