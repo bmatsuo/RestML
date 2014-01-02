@@ -226,7 +226,7 @@ restml.directive('rest', ['restSpec', function(restSpec) {
             var _src;
 
             var _init = function(restml) {
-                console.log("reinitializing rest directive");
+                console.log("initializing rest directive:", $scope.src);
                 if (typeof $scope.src === 'undefined') {
                     console.log("clearing rest directive");
                     $scope.service = null;
@@ -249,10 +249,8 @@ restml.directive('rest', ['restSpec', function(restSpec) {
 
                 restSpec.load(_src).then(
                     function(data) {
-                        console.log('loaded:', data);
                         if (typeof $scope.onLoad !== 'undefined') {
                             $scope.onLoad(data);
-
                         }
                     },
                     function(data, status) {
@@ -281,18 +279,20 @@ restml.directive('restAction', ['restSpec', function(restSpec) {
         },
         link: function($scope, element) {
             $scope.submit = function() {
-                console.log('performing action:', $scope.action.method, $scope.resource.path);
-                console.log('looking for parameters:', _.map($scope.action.params, function(value) { return value.name; }));
-                var inputs = element.find('input'),
-                    selects = element.find('select');
-                _.each(inputs, function(value) {
-                    var _element = angular.element(value);
-                    console.log(_element.attr('name') + ':', _element.val());
-                });
-                _.each(selects, function(value) {
-                    var _element = angular.element(value);
-                    console.log(_element.attr('name') + ':', _element.val());
-                });
+                // retreive parameter values
+                var params = {};
+                var paramElements = element.contents()[0].getElementsByClassName('rest-action-param');
+                paramElements = _.map(paramElements, function(elem) { return angular.element(elem); });
+                _.each(paramElements, function(elem) { params[elem.attr('name')] = elem.val(); });
+                console.log('params:', params);
+
+                // compute acceptable content-types
+                var accepts = [];
+                var acceptElements = element.contents()[0].getElementsByClassName('rest-action-accept');
+                acceptElements = _.map(acceptElements, function(elem) { return angular.element(elem); });
+                accepts = _.map(acceptElements, function(elem) { return elem.val(); });
+                accepts.push('*/*')
+                console.log('accept:', accepts)
             };
         }
     };
@@ -314,10 +314,7 @@ restml.directive('restSelect', ['restSpec', function(restSpec) {
             onSelect: '&',
         },
         link: function($scope, element) {
-            console.log('restSelect linked');
-
             $scope.setSrc = function(src) {
-                console.log('source selected:', src)
                 if (typeof $scope.onSelect !== 'undefined') {
                     $scope.onSelect({
                         serviceUrl: src
@@ -327,7 +324,6 @@ restml.directive('restSelect', ['restSpec', function(restSpec) {
 
             $scope.$watch('src', function() {
                 if ($scope.src !== $scope.textInput) {
-                    console.log('resetting textInput');
                     $scope.textInput = $scope.src;
                     $scope.setSrc($scope.src);
                 }

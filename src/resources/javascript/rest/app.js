@@ -2,10 +2,7 @@ var restApp = angular.module('restApp', ['restml']);
 
 restApp.controller('restController', ['$scope', 'restSpec', function($scope, restSpec) {
     $scope.selected = function(url) {
-        console.log('setting src:', url);
-        if (typeof url === 'string') {
-            $scope.src = url;
-        }
+        $scope.src = url;
     };
 
     $scope.serviceLoaded = function(service) {
