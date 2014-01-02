@@ -7,7 +7,7 @@
         A simple service that demonstrates the capabilities of RestML.
     </meta:description>
     <meta:license type="Apache 2.0" href="http://www.apache.org/licenses/LICENSE-2.0.html"/>
-    <meta:terms href="http://bmats.co/terms"/>
+    <meta:terms type="Terms of Service" href="http://bmats.co/terms"/>
     <rest:api baseUrl="http://meme.bmats.co" version="2.29.5-E">
         <meta:title>Memes</meta:title>
         <rest:group>

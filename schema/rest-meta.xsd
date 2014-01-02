@@ -18,11 +18,18 @@
     <xs:group name="Legal">
         <xs:sequence>
             <xs:element name="license" type="License" minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element name="terms" type="TermsOfService" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="terms" type="Terms" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:group>
 
-    <xs:complexType name="TermsOfService">
+    <xs:complexType name="Terms">
+        <xs:attribute name="type" type="xs:token" use="required">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    For example, "TermsOfService".
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
         <xs:attribute name="href" type="common:httpURI">
             <xs:annotation>
                 <xs:documentation xml:lang="en">
