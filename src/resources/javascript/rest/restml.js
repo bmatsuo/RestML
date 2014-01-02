@@ -37,161 +37,199 @@ restml.service('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         return q.promise;
     };
 
+    var NS_SERVICE = 'http://x.bmats.co/rest-service/2013.01',
+        NS_META = 'http://x.bmats.co/rest-meta/2013.01',
+        NS_REST = 'http://x.bmats.co/rest/2013.01';
+
+    var _nodeListToArray = function(list) {
+        var a = [];
+        for (var i = 0; i < list.length; i++) {
+            a.push(list.item(i));
+        }
+        return a
+    };
+
+    var _mapNode = function(list, f) {
+        return _.map(_nodeListToArray(list), f)
+    };
+
+    var _filterDOMNodeList = function(nodeList, predicate) {
+        var filtered = new DOMNodeList(nodeList.ownerDocument, nodeList.parentNode);
+        for (var i = 0; i < nodeList.length; i++) {
+            var node = nodeList.item(i);
+            if (predicate(node)) {
+                filtered._appendChild(node);
+            }
+        }
+        return filtered
+    };
+
+    var _getChildrenByTagNameNS = function(node, ns, local) {
+        return _filterDOMNodeList(node.childNodes, function(child) {
+            return child.getNamespaceURI().toString() === ns.toString() &&
+                child.localName == local;
+        })
+    };
+
+    var _getMeta = function(node, key) {
+        var child = _getChildrenByTagNameNS(node, NS_META, key).item(0),
+            text = child ? child.childNodes.item(0) : null,
+            val = text ? text.getNodeValue().toString() : undefined;
+        return val;
+    };
+
+    var _getRest = function(node, key) {
+        var child = _getChildrenByTagNameNS(node, NS_REST, key).item(0),
+            text = child ? child.childNodes.item(0) : null,
+            val = text ? text.getNodeValue().toString() : undefined;
+        return val;
+    }
+
+    var _buildParam = function(node) {
+        // FIXME no xml representation
+        var param = {};
+        param = {
+            name: "channel",
+            type: "query",
+            required: true,
+            description: "the channel being watched"
+        };
+        return param;
+    };
+
+    var _buildModel = function(node) {
+        // FIXME no xml representation
+        var model = {};
+        model = {
+            title: "OK",
+            description: "A generic success message"
+        }
+        return model;
+    };
+
+    var _statuses = {
+        "1xx": "Informal",
+        "2xx": "Success",
+        "3xx": "Redirection",
+        "4xx": "Client Error",
+        "5xx": "Server Error"
+    };
+
+    var _buildResponse = function(node) {
+        var response = {};
+
+        response.statusCode = node.getAttribute('status').toString();
+        response.status = _statuses[response.statusCode];
+        response.models = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'model'), _buildModel);
+
+        return response;
+    };
+
+    var _buildAction = function(node) {
+        var action = {};
+        action.method = node.getAttribute('method').toString();
+
+        action.title = _getMeta(node, 'title');
+        action.subtitle = _getMeta(node, 'subtitle');
+        action.description = _getMeta(node, 'description');
+
+        action.params = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'param'), _buildParam);
+        action.responses = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'response'), _buildResponse);
+
+        return action;
+    };
+
+    var _buildResource = function(node) {
+        var resource = {};
+
+        resource.path = node.getAttribute('path').toString();
+
+        resource.actions = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'action'), _buildAction);
+
+        resource = {
+            nickname: "watches",
+            path: resource.path,
+            actions: resource.actions
+        };
+        return resource
+    };
+
+    var _buildGroup = function(node) {
+        var group = {};
+        group.title = _getMeta(node, 'title');
+        group.subtitle = _getMeta(node, 'subtitle');
+        group.description = _getMeta(node, 'description');
+
+        group.resources = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'resource'), _buildResource);
+
+        return group;
+    };
+
+    var _buildApi = function(node) {
+        var api = {};
+        api.title = _getMeta(node, 'title');
+        api.subtitle = _getMeta(node, 'subtitle');
+        api.description = _getMeta(node, 'description');
+
+        api.baseUrl = node.getAttribute('baseUrl').toString();
+        api.version = node.getAttribute('version').toString();
+
+        api.groups = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'group'), _buildGroup);
+
+        return api;
+    };
+
+    var _buildLicense = function(node) {
+        var license = {};
+        license = {
+            type: 'GPL v3',
+            href: 'http://example.com/GPLv3'
+        }
+        return license;
+    };
+
+    var _buildTerms = function(node) {
+        var terms = {};
+        terms = {
+            name: 'Terms of Service',
+            href: 'http://example.com/terms'
+        }
+        return terms;
+    };
+
+    var _buildService = function(node) {
+        var service = {};
+
+        service.title = _getMeta(node, 'title');
+        service.subtitle = _getMeta(node, 'subtitle');
+        service.description = _getMeta(node, 'description');
+
+        service.apis = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'api'), _buildApi);
+        service.licenses = _mapNode(_getChildrenByTagNameNS(node, NS_META, 'license'), _buildLicense);
+        service.terms = _mapNode(_getChildrenByTagNameNS(node, NS_META, 'terms'), _buildTerms);
+
+        return service;
+    };
+
+    var _buildSpec = function(xml) {
+        var root = xml.domTree;
+
+        if (root.getNamespaceURI().toString() !== NS_SERVICE) {
+            throw 'invalid namespace: ' + ns;
+        }
+
+        return {
+            xml: xml,
+            service: _buildService(xml.domTree)
+        };
+    };
+
     var _load = function(src) {
         var q = $q.defer();
         $http.get(src).
             success(function(data, status, header) {
                 _loadXML(data).then(
-                    function(xml) {
-                        q.resolve({
-                            service: {
-                                title: 'REST documentation',
-                                subtitle: 'ARS',
-                                description: 'Another REST service.',
-                                apis: [
-                                    {
-                                        title: "Notification",
-                                        description: "Notification management and triggering",
-                                        groups: [
-                                            {
-                                                title: "Watch",
-                                                subtitle: "Receive notifications",
-                                                description: "A system to declare interest in notifications channels.",
-                                                resources: [
-                                                    {
-                                                        nickname: "watches",
-                                                        path: "/watch",
-                                                        actions: [
-                                                            {
-                                                                method: "GET",
-                                                                title: "Search for watches",
-                                                                params: [
-                                                                    {
-                                                                        name: "channel",
-                                                                        type: "query",
-                                                                        required: true,
-                                                                        description: "the channel being watched"
-                                                                    },
-                                                                    {
-                                                                        name: "creator",
-                                                                        type: "query",
-                                                                        required: false,
-                                                                        description: "the creator of the watch"
-                                                                    }
-                                                                ],
-                                                                responses: [
-                                                                    {
-                                                                        status: "Success",
-                                                                        statusCode: "2XX",
-                                                                        models: [
-                                                                            {
-                                                                                title: "OK",
-                                                                                description: "A generic success message"
-                                                                            }
-                                                                        ]
-                                                                    }
-                                                                ]
-                                                            },
-                                                            {
-                                                                method: "POST",
-                                                                title: "Create a watch",
-                                                                params: [
-                                                                    {
-                                                                        name: "channel",
-                                                                        type: "form",
-                                                                        required: true,
-                                                                        description: "the channel being watched"
-                                                                    }
-                                                                ],
-                                                                responses: [
-                                                                    {
-                                                                        status: "Success",
-                                                                        statusCode: "2XX",
-                                                                        models: [
-                                                                            {
-                                                                                title: "OK",
-                                                                                description: "A generic success message"
-                                                                            }
-                                                                        ]
-                                                                    }
-                                                                ]
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        nickname: "watch",
-                                                        path: "/watch/{id}"
-                                                    }
-                                                ]
-                                            },
-                                            {
-                                                title: "Notify",
-                                                subtitle: "Send notifications",
-                                                description: "Deliver information to interested parties.",
-                                                resources: [
-                                                    {
-                                                        nickname: "notify",
-                                                        path: "/notification",
-                                                        actions: [
-                                                            {
-                                                                method: "POST",
-                                                                title: "Issue a notificiation over a channel",
-                                                                params: [
-                                                                    {
-                                                                        name: "channel",
-                                                                        type: "form",
-                                                                        required: true,
-                                                                        description: "the channel being watched"
-                                                                    },
-                                                                    {
-                                                                        name: "contentType",
-                                                                        type: "form",
-                                                                        required: false,
-                                                                        description: "format of the payload"
-                                                                    },
-                                                                    {
-                                                                        name: "payload",
-                                                                        type: "form",
-                                                                        required: false,
-                                                                        description: "the notification message payload"
-                                                                    }
-                                                                ],
-                                                                responses: [
-                                                                    {
-                                                                        status: "Success",
-                                                                        statusCode: "2XX",
-                                                                        models: [
-                                                                            {
-                                                                                title: "OK",
-                                                                                description: "A generic success message"
-                                                                            }
-                                                                        ]
-                                                                    }
-                                                                ]
-                                                            }
-                                                        ]
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                ],
-                                licenses: [
-                                    {
-                                        type: 'GPL v3',
-                                        href: 'http://example.com/GPLv3'
-                                    }
-                                ],
-                                terms: [
-                                    {
-                                        name: 'Terms of Service',
-                                        href: 'http://example.com/terms'
-                                    }
-                                ],
-                                xml: data
-                            }
-                        });
-                    },
+                    function(xml) { q.resolve(_buildSpec(xml)); },
                     function(e) { q.reject(e); });
             }).
             error(function(data, status) {
