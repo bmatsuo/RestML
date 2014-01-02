@@ -9,7 +9,7 @@
     <div class="container">
         <rest-select src="'/service.xml'" on-select="selected(serviceUrl)"></rest-select>
 
-        <rest src="src" on-load="serviceLoaded(service)">
+        <rest src="src" on-load="serviceLoaded(service)" ng-cloak>
             <h1>{{title}} <small>{{subtitle}}</small></h1>
             <p>{{description}}</p>
 
@@ -109,12 +109,12 @@
                 <div class="license-list">
                     <p ng-repeat="license in licenses">
                         This work except where otherwise noted is licensed through {{license.type}}.
-                        Terms of this license can be found <a href="license.href">here</a>.
+                        The terms of this license can be found <a ng-href="{{license.href}}">here</a>.
                     </p>
                 </div>
                 <div class="term-list">
                     <p ng-repeat="t in terms">
-                        By using these APIs you agree to the <a href="t.href">{{t.name}}</a>.
+                        By using these APIs you agree to the <a ng-href="{{t.href}}">{{t.type}}</a>.
                     </p>
                 </div>
             </div>

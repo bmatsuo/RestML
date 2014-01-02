@@ -181,19 +181,15 @@ restml.service('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
 
     var _buildLicense = function(node) {
         var license = {};
-        license = {
-            type: 'GPL v3',
-            href: 'http://example.com/GPLv3'
-        }
+        license.type = node.getAttribute('type').toString();
+        license.href = node.getAttribute('href').toString();
         return license;
     };
 
     var _buildTerms = function(node) {
         var terms = {};
-        terms = {
-            name: 'Terms of Service',
-            href: 'http://example.com/terms'
-        }
+        terms.type = node.getAttribute('type').toString();
+        terms.href = node.getAttribute('href').toString();
         return terms;
     };
 
