@@ -8,7 +8,7 @@ This is __free__ software y'all.
 
 var restml = angular.module('restml', []);
 
-restml.service('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $http, $q) {
+restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $http, $q) {
     var _dom,  // the specification DOM
         _tree; // the specification DOM tree
 
