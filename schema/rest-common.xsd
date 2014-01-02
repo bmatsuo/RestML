@@ -54,11 +54,11 @@
         </xs:annotation>
         <xs:restriction base="xs:string">
             <!-- TODO individual status codes -->
-            <xs:enumeration value="1XX"/>
-            <xs:enumeration value="2XX"/>
-            <xs:enumeration value="3XX"/>
-            <xs:enumeration value="4XX"/>
-            <xs:enumeration value="5XX"/>
+            <xs:enumeration value="1xx"/>
+            <xs:enumeration value="2xx"/>
+            <xs:enumeration value="3xx"/>
+            <xs:enumeration value="4xx"/>
+            <xs:enumeration value="5xx"/>
         </xs:restriction>
     </xs:simpleType>
 
