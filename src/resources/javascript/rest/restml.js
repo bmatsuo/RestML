@@ -97,7 +97,7 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         return param;
     };
 
-    var _buildModel = function(node) {
+    var _buildModelRef = function(node) {
         // FIXME no xml representation
         var model = {};
         model = {
@@ -120,7 +120,7 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
 
         response.statusCode = node.getAttribute('status').toString();
         response.status = _statuses[response.statusCode];
-        response.models = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'model'), _buildModel);
+        response.models = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'model'), _buildModelRef);
 
         return response;
     };
@@ -165,6 +165,15 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         return group;
     };
 
+    var _buildModel = function(node) {
+        var model = {};
+        model.id = node.getAttribute('id').toString();
+        model.title = _getMeta(node, 'title');
+        model.subtitle = _getMeta(node, 'subtitle');
+        model.description = _getMeta(node, 'description');
+        return model;
+    };
+
     var _buildApi = function(node) {
         var api = {};
         api.title = _getMeta(node, 'title');
@@ -175,6 +184,7 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         api.version = node.getAttribute('version').toString();
 
         api.groups = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'group'), _buildGroup);
+        api.models = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'model'), _buildModel);
 
         return api;
     };
