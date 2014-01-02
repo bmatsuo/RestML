@@ -24,7 +24,7 @@
                     <div ng-repeat="resource in group.resources">
                         <rest-action ng-repeat="action in resource.actions" resource="resource" action="action">
                             <div class="panel panel-default">
-                                <div class="panel-heading">
+                                <div class="panel-heading action-header">
                                     <div class="row">
                                         <span class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
                                             <strong>{{action.method}}</strong>
@@ -37,7 +37,7 @@
                                         </span>
                                     </div>
                                 </div>
-                                <table class="table table-hover">
+                                <table class="table table-hover parameter-specification">
                                     <tr ng-repeat="param in action.params" class="form-group">
                                         <td class="col-lg-1 col-md-1 col-sm-1 col-xs-1" ng-class="{'text-muted': !param.required}">
                                             <label for="resource_{{resource.nickname}}-{{action.method}}-param_{{param.name}}" class="control-label">
@@ -59,45 +59,60 @@
                                     </tr>
                                 </table>
 
-                                <div class="panel-body">
-                                    <div class="form-group">
-                                        <div>
-                                            <label for="accept" class="col-sm-2 control-label">Accept</label>
-                                        </div>
-                                        <div class="col-sm-10">
-                                            <!-- TODO use a directive to add the rest-action-accept class -->
-                                            <select id="accept" class="form-control rest-action-accept" name="rest-accept-type">
-                                                <option value="application/json">application/json</option>
-                                                <option value="text/xml">text/xml</option>
-                                            </select>
-                                        </div>
+                                <div class="panel-body accept-specification">
+                                    <div>
+                                        <label for="accept" class="col-sm-2 control-label">Accept</label>
+                                    </div>
+                                    <div class="col-sm-10">
+                                        <!-- TODO use a directive to add the rest-action-accept class -->
+                                        <select id="accept" class="form-control rest-action-accept" name="rest-accept-type">
+                                            <option value="application/json">application/json</option>
+                                            <option value="text/xml">text/xml</option>
+                                        </select>
                                     </div>
                                 </div>
 
-                                <div class="panel-body">
-                                    <h4>Responses:</h4>
-                                    <div ng-repeat="response in action.responses" class="response">
-                                        <div class="row status">
-                                            <strong>
-                                                <span class="col-lg-1 col-md-1 col-sm-1 col-xs-1">{{response.statusCode}}</span>
-                                                <span class="col-lg-2 col-md-2 col-sm-2 col-xs-2">{{response.status}}</span>
+                                <div class="panel-body response-specification">
+                                    <ul class="list-unstyled response-list">
+                                        <li ng-repeat="response in action.responses" class="response">
+                                            <strong class="status">
+                                                <span class="status-code">{{response.statusCode}}</span>
+                                                <span class="status-name">{{response.status}}</span>
                                             </strong>
-                                        </div>
 
-                                        <div ng-repeat="model in response.models" class="model">
-                                            <div class="row">
-                                                <strong>
-                                                    <span class="col-lg-2 col-md-2 col-sm-2 col-xs-2">{{model.title}} <small>{{model.subtitle}}</small></span>
-                                                </strong>
-                                                <span class="col-lg-10 col-md-10 col-sm-10 col-xs-10">{{model.description}}</span>
-                                            </div>
-                                            <!--rest-model spec="model">Schema...</rest-model-->
-                                        </div>
-                                    </div>
-
+                                            <!-- XXX use list-style-type:none instead of list-unstyled because it keeps the margin -->
+                                            <ul style="list-style-type: none;" class="model-list">
+                                                <li ng-repeat="model in response.models" class="model">
+                                                    <div>
+                                                        <span>
+                                                            <strong>{{model.title}} <small>{{model.subtitle}}</small> </strong>
+                                                        </span>
+                                                        <span>{{model.description}}</span>
+                                                    </div>
+                                                    <!--rest-model spec="model">Schema...</rest-model-->
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
                                 </div>
+
                                 <div class="panel-body">
                                     <button type="submit" class="btn btn-primary">Try it out!</button>
+                                </div>
+
+                                <div class="panel-body">
+                                    Request URI
+                                    <div class="well well-default request-uri">uri</div>
+                                </div>
+
+                                <div class="panel-body">
+                                    Response Header
+                                    <div class="well well-default response-header">header</div>
+                                </div>
+
+                                <div class="panel-body">
+                                    Response Body
+                                    <div class="well well-default response-body">body</div>
                                 </div>
                             </div>
                         </rest-action>
