@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:meta="http://x.bmats.co/rest-meta/2013.01"
+           xmlns:model="http://x.bmats.co/rest-model/2013.01"
            xmlns:common="http://x.bmats.co/rest-common/2013.01"
            xmlns="http://x.bmats.co/rest/2013.01"
            targetNamespace="http://x.bmats.co/rest/2013.01"
            elementFormDefault="qualified">
 
-    <xs:import namespace="http://x.bmats.co/rest-common/2013.01" schemaLocation="rest-common.xsd"/>
     <xs:import namespace="http://x.bmats.co/rest-meta/2013.01" schemaLocation="rest-meta.xsd"/>
+    <xs:import namespace="http://x.bmats.co/rest-model/2013.01" schemaLocation="rest-model.xsd"/>
+    <xs:import namespace="http://x.bmats.co/rest-common/2013.01" schemaLocation="rest-common.xsd"/>
 
     <xs:element name="api" type="API"/>
 
@@ -52,10 +54,20 @@
     <xs:complexType name="Action">
         <xs:sequence>
             <xs:group ref="meta:About"/>
-            <xs:element name="param" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="param" type="Parameter" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="response" type="Response" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attribute name="method" type="common:httpMethod" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="Parameter">
+        <xs:sequence>
+            <!-- meta:description -->
+            <xs:group ref="model:primitiveModel"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:NCName" use="required"/>
+        <xs:attribute name="type" type="common:parameterType" use="required"/>
+        <xs:attribute name="required" type="xs:boolean" default="false"/>
     </xs:complexType>
 
     <xs:complexType name="Response">

@@ -86,14 +86,13 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
     }
 
     var _buildParam = function(node) {
-        // FIXME no xml representation
         var param = {};
-        param = {
-            name: "channel",
-            type: "query",
-            required: true,
-            description: "the channel being watched"
-        };
+        param.name = node.getAttribute('name').toString();
+        param.type = node.getAttribute('type').toString();
+        param.required = Boolean(node.getAttribute('required').toString()); // defaults false
+        param.description = "??? description ???";
+
+        param.model = {};
         return param;
     };
 

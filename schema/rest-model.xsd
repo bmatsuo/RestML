@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="http://x.bmats.co/rest-model/2013.01"
+           targetNamespace="http://x.bmats.co/rest-model/2013.01"
+           elementFormDefault="qualified">
+
+    <xs:simpleType name="anyType">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                The set of all model types. See 'primitive' and 'structured'
+                types for more information.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:union memberTypes="primitive structured"/>
+    </xs:simpleType>
+
+    <xs:simpleType name="primitive">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Primative types with underlying native string representations.
+                These types can be used as query, path, and form parameters as
+                well as in response models.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:NCName">
+            <xs:enumeration value="string"/>
+            <xs:enumeration value="url"/>
+            <xs:enumeration value="boolean"/>
+            <xs:enumeration value="false"/>
+            <xs:enumeration value="true"/>
+            <xs:enumeration value="integer"/>
+            <xs:enumeration value="positive-integer"/>
+            <xs:enumeration value="non-negative-integer"/>
+            <xs:enumeration value="non-positive-integer"/>
+            <xs:enumeration value="negative-integer"/>
+            <xs:enumeration value="decimal"/>
+            <xs:enumeration value="positive-decimal"/>
+            <xs:enumeration value="non-negative-decimal"/>
+            <xs:enumeration value="non-positive-decimal"/>
+            <xs:enumeration value="negative-decimal"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="structured">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Structured types without native string representations.
+                These type can be used only in response models.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:NCName">
+            <xs:enumeration value="list"/>
+            <xs:enumeration value="keyed"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+
+    <xs:group name="primitiveModel">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                A primitive model specification. The specified class of values
+                must be a chain of restrictions on a simple type (this may change
+                in future versions).
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:group ref="restriction"/>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="enumeration"/>
+                <xs:element ref="maxExclusive"/>
+                <xs:element ref="max"/>
+                <xs:element ref="maxLength"/>
+                <xs:element ref="minExclusive"/>
+                <xs:element ref="min"/>
+                <xs:element ref="minLength"/>
+            </xs:choice>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:group name="anyModel">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                A model specification. The specified class of values is a chain
+                of restrictions on a primitive type or a chain of extensions on
+                a structured type.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice>
+            <xs:group ref="extension"/>
+            <xs:group ref="restriction"/>
+            <xs:element ref="list"/>
+        </xs:choice>
+    </xs:group>
+
+    <xs:element name="list" type="List"/>
+    <xs:complexType name="List">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                A list of models. The resulting model retains the
+                primitive/structured nature of its element models. However, the
+                model cannot be used in the primitiveModel group. Lists of
+                lists can be constructed, but it is considered a phenomenally
+                bad practice in ordinary circumstances.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="value" type="xs:NCName"/>
+    </xs:complexType>
+
+    <xs:group name="extension">
+        <xs:sequence>
+            <xs:element name="extends" type="Extends"/>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:complexType name="Extends">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Specify key-value pairs in addition to those defined on a named
+                (list of) structured model/type. The resulting model is
+                structured.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="value" type="xs:NCName" use="required"/>
+    </xs:complexType>
+
+    <xs:group name="restriction">
+        <xs:sequence>
+            <xs:element name="restricts" type="Restricts"/>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:complexType name="Restricts">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Specify constraints in addition to those defined on a named
+                primitive model/type. The resulting model is primitive.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="value" type="xs:NCName" use="required"/>
+    </xs:complexType>
+
+    <xs:element name="enumeration" type="StringConstraint">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Enumeration values within a single restriction form a set that the
+                model value must be a member of.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:element name="maxLength" type="IntegerConstraint">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Specify the maximum length for the string representation of a primitive type
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:element name="max" type="IntegerConstraint">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Specify the (inclusive) maximum value for the string
+                representation of a primitive type interpreted as a decimal
+                number. See min for more information.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:element name="maxExclusive" type="IntegerConstraint">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Like max, but the inequality is exclusive.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:element name="minLength" type="IntegerConstraint">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Specify the minimum length for the string representation of a primitive type.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:element name="min" type="IntegerConstraint">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Specify the (inclusive) minimum value for the string
+                representation of a primitive type interpreted as an unbounded
+                decimal number *only if* such an interpretation is possible. The
+                constraint is not considered violated if its string
+                representation does not look like a number.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:element name="minExclusive" type="IntegerConstraint">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                Like min, but the inequality is exclusive.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="IntegerConstraint">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                A base type for constraint elements in the namespace.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="value" type="xs:integer" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="StringConstraint">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                A base type for constraint elements in the namespace.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="value" type="xs:string" use="required"/>
+    </xs:complexType>
+
+</xs:schema>

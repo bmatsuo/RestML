@@ -68,4 +68,13 @@
         </xs:restriction>
     </xs:simpleType>
 
+    <xs:simpleType name="parameterType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="path"/>
+            <xs:enumeration value="query"/>
+            <xs:enumeration value="form"/>
+            <!--xs:enumeration value="file"/-->
+        </xs:restriction>
+    </xs:simpleType>
+
 </xs:schema>
