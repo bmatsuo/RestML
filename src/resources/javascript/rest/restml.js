@@ -6,6 +6,122 @@ rest.js
 This is __free__ software y'all.
 */
 
+var X = function() {
+    var _Node = function(node) {
+        var self = this;
+
+        var _nodeListToArray = function(list) {
+            var a = [];
+            for (var i = 0; i < list.length; i++) {
+                a.push(list.item(i));
+            }
+            return a
+        };
+
+        var _mapNode = function(list, f) {
+            return _.map(_nodeListToArray(list), f)
+        };
+
+        var _filterNode = function(nodeList, predicate) {
+            var filtered = new DOMNodeList(nodeList.ownerDocument, nodeList.parentNode);
+            for (var i = 0; i < nodeList.length; i++) {
+                var node = nodeList.item(i);
+                if (predicate(node)) {
+                    filtered._appendChild(node);
+                }
+            }
+            return filtered
+        };
+
+        var _attr = function() {
+            var nsuri, local;
+            if (arguments.length === 2) {
+                nsuri = arguments[0];
+                local = arguments[1];
+            } else if (arguments.length === 1) {
+                local = arguments[0];
+            } else {
+                throw 'unexpected number of arguments: ' + arguments.length
+            }
+
+            var a;
+            if (nsuri) {
+                a = node.getAttributeNodeNS(nsuri, local);
+            } else {
+                a = node.getAttributeNode(local);
+            }
+            if (a) a = new _Node(a);
+
+            return a;
+        };
+
+        var _find = function(filter) {
+            throw 'unimplemented';
+        };
+
+        var _children = function(filter) {
+            var children = node.getChildNodes();
+
+            if (typeof filter === 'undefined') {
+                // noop
+            } else if (typeof filter === 'string') {
+                children = _filterNode(children, function(child) { return child.localName === filter; });
+            } else {
+                if (typeof filter.ns !== 'function' || typeof filter.local !== 'function') {
+                    return [];
+                }
+
+                var ns = filter.ns().uri();
+                var local = filter.local();
+
+                children = _filterNode(children, function(child) {
+                    return child.namespaceURI.toString() === ns && child.localName === local;
+                });
+            }
+            children = _mapNode(children, function(child) { return new _Node(child) });
+
+            return children
+        }
+
+        var _text = function() { return node.value.toString(); };
+        var _int = function() { return parseInt(_text()); };
+        var _float = function() { return parseFloat(_text()); };
+        var _bool = function() {
+            var t = _text();
+            if (t === 'true') return true;
+            if (t === 'false') return false;
+            return null;
+        };
+
+        return {
+            attr: _attr,
+            children: _children,
+            text: _text,
+            int: _int,
+            float: _float,
+            bool: _bool,
+            node: function() { return node; }
+        };
+    };
+
+    var _NS = function(uri) {
+        var self = function(local) {
+            return {
+                ns: function() { return self; },
+                local: function() { return local; },
+                toString: function() { return '{' + uri + '}:' + local }
+            };
+        };
+        self.__proto__.uri = function() { return uri; };
+        return self;
+    };
+
+    return {
+        Node: _Node,
+        NS: _NS
+    };
+}()
+
 var restml = angular.module('restml', []);
 
 restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $http, $q) {
@@ -86,6 +202,146 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         return val;
     }
 
+    var Model = function(constraints) {
+        var _baseType, _enum, _enumValues = [];
+        if (constraints.length > 1) {
+            var base = constraints[0].value;
+            if (base !== 'string' &&
+                base !== 'url' &&
+                base !== 'boolean' &&
+                base !== 'false' &&
+                base !== 'true' &&
+                base !== 'integer' &&
+                base !== 'positive-integer' &&
+                base !== 'non-negative-integer' &&
+                base !== 'non-positive-integer' &&
+                base !== 'negative-integer' &&
+                base !== 'decimal' &&
+                base !== 'positive-decimal' &&
+                base !== 'non-negative-decimal' &&
+                base !== 'non-positive-decimal' &&
+                base !== 'negative-decimal')
+                throw 'unrecognized primitive type: ' + base.value;
+
+            _baseType = base;
+            constraints = constraints.slice(1, constraints.length)
+            _.each(constraints, function(c) {
+                if (c.type === 'min') {
+                    c.value = parseFloat(c.value);
+                } else if (c.type === 'max') {
+                    c.value = parseFloat(c.value);
+                } else if (c.type === 'minLength') {
+                    c.value = parseFloat(c.value);
+                } else if (c.type === 'maxLength') {
+                    c.value = parseFloat(c.value);
+                } else if (c.type === 'minExclusive') {
+                    c.value = parseFloat(c.value);
+                } else if (c.type === 'maxExclusive') {
+                    c.value = parseFloat(c.value);
+                } else if (c.type === 'enumeration') {
+                    _enum = true;
+                }
+            });
+
+            if (_enum) {
+                _enumValues = _.filter(constraints, function() { return c.type === 'enumeration'; });
+                _enumValues = _.map(_enumValues,    function() { return c.value; });
+            }
+        }
+
+        var _minimizeConstraints = function() {
+            // TODO
+        };
+
+        var _validate = function(data) {
+            var errors = [],
+                decimal;
+
+            if (_enum && !_.find(_enumValues, function(v) { return v === data; })) {
+                errors.push('value must be one of {' + _enumValues.join(', ') + '}');
+            }
+
+            if (_baseType === 'integer' ||
+                _baseType === 'positive-integer' || _baseType === 'non-negative-integer' ||
+                _baseType === 'non-positive-integer' || _baseType === 'negative-integer') {
+                decimal = parseInt(data);
+                if (isNaN(decimal)) {
+                    errors.push({reason: 'must be an integer'});
+                } else if (decimal < 0 && (_baseType === 'postive-integer' || _baseType === 'non-negative-integer')) {
+                    errors.push({reason: 'cannot not be negative'});
+                } else if (decimal > 0 && (_baseType === 'negative-integer' || _baseType === 'non-positive-integer')) {
+                    errors.push({reason: 'cannot not be positive'});
+                } else if (decimal === 0 && (_baseType === 'positive-integer' || _baseType ==='negative-integer')) {
+                    errors.push({reason: 'cannot not be zero'});
+                }
+            } else if (_baseType === 'decimal' ||
+                _baseType === 'positive-decimal' || _baseType === 'non-negative-decimal' ||
+                _baseType === 'non-positive-decimal' || _baseType === 'negative-decimal') {
+                decimal = parseInt(data);
+                if (isNaN(decimal)) {
+                    errors.push({reason: 'must be a decimal number'});
+                } else if (decimal < 0 && (_baseType === 'postive-decimal' || _baseType === 'non-negative-decimal')) {
+                    errors.push({reason: 'cannot not be negative'});
+                } else if (decimal > 0 && (_baseType === 'negative-decimal' || _baseType === 'non-positive-decimal')) {
+                    errors.push({reason: 'cannot not be positive'});
+                } else if (decimal === 0 && (_baseType === 'positive-decimal' || _baseType ==='negative-decimal')) {
+                    errors.push({reason: 'cannot not be zero'});
+                }
+            } else if (_baseType === 'boolean' || _baseType === 'true' || _baseType === 'false') {
+                var isBool = data === 'true' || data === 'false',
+                    b = Boolean(data);
+                if (!isBool) {
+                    errors.push({reason: 'must be boolean'});
+                } else if (b && _baseType === 'false') {
+                    errors.push({reason: 'must be false'});
+                } else if (!b && _baseType === 'true') {
+                    errors.push({reason: 'must be true'});
+                }
+            } else if (_baseType === 'url') {
+                var urlre = /^https?:\/\/([^.]+[.])[^.]{2,}(\/[^\/])*$/;
+                if (!data.match(urlre)) {
+                    errors.push({reason: 'must be a url'});
+                }
+            }
+
+            _.each(constraints, function(c) {
+                if (c.type === 'min') {
+                    if (decimal < c.value) {
+                        errors.push({reason: 'must be at least ' + n.toString()});
+                    }
+                } else if (c.type === 'max') {
+                    if (c.value < decimal) {
+                        errors.push({reason: 'must not be more than ' + n.toString()});
+                    }
+                } else if (c.type === 'minLength') {
+                    if (data.length < c.value) {
+                        errors.push({reason: 'must be at least ' + n.toString() + 'characters'});
+                    }
+                } else if (c.type === 'maxLength') {
+                    if (c.value < data.length) {
+                        errors.push({reason: 'must not be more than ' + n.toString() + 'characters'});
+                    }
+                } else if (c.type === 'minExclusive') {
+                    if (decimal <= c.value) {
+                        errors.push({reason: 'must be greater than ' + c.value.toString()});
+                    }
+                } else if (c.type === 'maxExclusive') {
+                    if (c.value <= decimal) {
+                        errors.push({reason: 'must be less than ' + c.value.toString()});
+                    }
+                }
+            });
+
+
+            return errors;
+        };
+
+        return {
+            baseType: function() { return _baseType; },
+            validate: _validate,
+        };
+    };
+
     var _buildParam = function(node) {
         var param = {};
         param.name = node.getAttribute('name').toString();
@@ -122,12 +378,13 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         } else if (base.value === 'non-negative-decimal') {
         } else if (base.value === 'non-positive-decimal') {
         } else if (base.value === 'negative-decimal') {
-        } else { // TODO derived models
+        } else {
             throw 'unrecognized primitive type: ' + base.value;
         }
 
-        param.model.type = base.value;
-        param.model.constraints = constraints; // TODO constraint chains from derived models
+        // TODO derived models
+        param.model.baseType = base.value;
+        param.model.constraints = constraints;
 
         return param;
     };

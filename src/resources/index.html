@@ -41,7 +41,7 @@
                                     <tr ng-repeat="param in action.params" class="form-group">
                                         <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3" ng-class="{'text-muted': !param.required}">
                                             <label for="resource_{{resource.nickname}}-{{action.method}}-param_{{param.name}}" class="control-label">
-                                                {{param.name}}: {{param.model.type}}
+                                                {{param.name}}: {{param.model.baseType}}
                                             </label>
                                         </td>
                                         <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
