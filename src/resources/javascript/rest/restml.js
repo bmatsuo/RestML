@@ -38,6 +38,7 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
     };
 
     var NS_SERVICE = 'http://x.bmats.co/rest-service/2013.01',
+        NS_MODEL = 'http://x.bmats.co/rest-model/2013.01',
         NS_META = 'http://x.bmats.co/rest-meta/2013.01',
         NS_REST = 'http://x.bmats.co/rest/2013.01';
 
@@ -53,7 +54,7 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         return _.map(_nodeListToArray(list), f)
     };
 
-    var _filterDOMNodeList = function(nodeList, predicate) {
+    var _filterNode = function(nodeList, predicate) {
         var filtered = new DOMNodeList(nodeList.ownerDocument, nodeList.parentNode);
         for (var i = 0; i < nodeList.length; i++) {
             var node = nodeList.item(i);
@@ -65,7 +66,7 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
     };
 
     var _getChildrenByTagNameNS = function(node, ns, local) {
-        return _filterDOMNodeList(node.childNodes, function(child) {
+        return _filterNode(node.childNodes, function(child) {
             return child.getNamespaceURI().toString() === ns.toString() &&
                 child.localName == local;
         })
@@ -93,6 +94,41 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         param.description = "??? description ???";
 
         param.model = {};
+
+        var constraints = node.getChildNodes();
+        constraints = _filterNode(constraints, function(child) {
+            return child.getNamespaceURI().toString() === NS_MODEL
+        });
+        constraints = _mapNode(constraints, function(child) {
+            return {
+                type: child.localName,
+                value: child.getAttribute('value').toString()
+            };
+        });
+
+        var base = constraints.shift();
+        if (base.value === 'string') {
+        } else if (base.value === 'url') {
+        } else if (base.value === 'boolean') {
+        } else if (base.value === 'false') {
+        } else if (base.value === 'true') {
+        } else if (base.value === 'integer') {
+        } else if (base.value === 'positive-integer') {
+        } else if (base.value === 'non-negative-integer') {
+        } else if (base.value === 'non-positive-integer') {
+        } else if (base.value === 'negative-integer') {
+        } else if (base.value === 'decimal') {
+        } else if (base.value === 'positive-decimal') {
+        } else if (base.value === 'non-negative-decimal') {
+        } else if (base.value === 'non-positive-decimal') {
+        } else if (base.value === 'negative-decimal') {
+        } else { // TODO derived models
+            throw 'unrecognized primitive type: ' + base.value;
+        }
+
+        param.model.type = base.value;
+        param.model.constraints = constraints; // TODO constraint chains from derived models
+
         return param;
     };
 

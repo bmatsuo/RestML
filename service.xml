@@ -16,6 +16,7 @@
         <rest:group>
             <meta:title>Cats</meta:title>
             <meta:subtitle>u can haz</meta:subtitle>
+
             <rest:resource path="/cats">
                 <rest:action method="GET">
                     <meta:title>Find a cat</meta:title>
@@ -29,6 +30,7 @@
                     </rest:response>
                 </rest:action>
             </rest:resource>
+
             <rest:resource path="/bar"/>
         </rest:group>
 
