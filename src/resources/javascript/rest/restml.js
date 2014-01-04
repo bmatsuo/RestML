@@ -601,24 +601,12 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         }, q.reject);
         return q.promise;
     };
-    var _pseq = function(ps) {
-        if (ps.length == 0) {
-            var q = $q.defer();
-            q.resolve([]);
-            return q.promise;
-        } else {
-            var head = ps[0];
-            var tail = ps.slice(1, ps.length);
-            var cat = function(h, t) { return [h].concat(t); };
-            return _pmap2(head, _pseq(tail), cat);
-        }
-    };
 
     var _buildService = function(node) {
         node = X.Node(node);
         console.log('building api specifications');
         var apiPromises = _.map(node.children(NS.Rest('api')), _buildApi);
-        return _pmap(_pseq(apiPromises), function(apis) {
+        return _pmap($q.all(apiPromises), function(apis) {
             var service = {};
 
             service.apis = apis;
