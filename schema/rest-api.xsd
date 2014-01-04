@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="http://x.bmats.co/rest-service/2013.01"
+           targetNamespace="http://x.bmats.co/rest-service/2013.01"
+           elementFormDefault="qualified">
+    <xs:complexType name="API">
+        <xs:sequence>
+            <xs:group ref="meta:About"/>
+            <xs:element name="group" type="Group" maxOccurs="unbounded"/>
+            <xs:element name="model" type="Model" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attributeGroup ref="common:ID"/>
+        <xs:attribute name="version" type="xs:token">
+            <xs:annotation>
+                <xs:documentation>
+                    The service API version. This may be a semantic version, a
+                    daily release number, a git commit hash, a combination, ...
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="baseUrl" type="xs:token">
+            <xs:annotation>
+                <xs:documentation>
+                    The base (absolute) URL shared by all resources in the API.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+</xs:schema>

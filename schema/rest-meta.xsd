@@ -9,7 +9,7 @@
 
     <xs:group name="About">
         <xs:sequence>
-            <xs:element name="title" type="common:text"/>
+            <xs:element name="title" type="common:text" minOccurs="0"/>
             <xs:element name="subtitle" type="common:text" minOccurs="0"/>
             <xs:element name="description" type="common:text" minOccurs="0"/>
         </xs:sequence>

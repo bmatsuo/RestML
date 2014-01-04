@@ -16,11 +16,11 @@
     <xs:complexType name="API">
         <xs:sequence>
             <xs:group ref="meta:About"/>
-            <xs:element name="group" type="Group" maxOccurs="unbounded"/>
+            <xs:element name="group" type="Group" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="model" type="Model" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attributeGroup ref="common:ID"/>
-        <xs:attribute name="href" type="common:httpURI" use="prohibited"><!-- FIXME -->
+        <xs:attribute name="href" type="xs:anyURI">
             <xs:annotation>
                 <xs:documentation xml:lang="en">
                     A resolvable reference to a &lt;api&gt; XML document. When this

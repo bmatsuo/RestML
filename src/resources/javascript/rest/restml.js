@@ -504,8 +504,10 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         return model;
     };
 
-    var _buildApi = function(node) {
+    var _buildApi_really = function(node) {
         var api = {};
+
+        api.id = node.attr('id').text();
         api.title = node.child(NS.Meta('title')).child().text();
         api.subtitle = node.child(NS.Meta('subtitle')).child().text();
         api.description = node.child(NS.Meta('description')).child().text();
@@ -515,6 +517,46 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         api.models = _.map(node.children(NS.Rest('model')), _buildModel);
 
         return api;
+    }
+
+    var _buildApi = function(node) {
+        var id = node.attr('id').text();
+        var q = $q.defer();
+
+        var href = node.attr('href').text();
+        if (href !== null) {
+            if (href === '') {
+                console.log('WARNING: empty href attribute on rest:api "'+id+'"');
+            } else {
+                console.log('NOTICE: fetching rest:api "'+id+'"');
+                $http.get(href).
+                    success(function(data, status) {
+                        _loadXML(data).
+                            then(function(xml) {
+                                _buildApi(X.Node(xml.domTree)). // FIXME i'm losing information here.
+                                    then(function(api) {
+                                        if (api.id !== id) {
+                                            var msg = 'rest:api at '+href;
+                                            msg += ' has id "'+api.id+'"';
+                                            msg += ' when id "'+id+'"';
+                                            msg += ' is expected';
+                                            q.reject(msg)
+                                        } else {
+                                            q.resolve(api);
+                                        }
+                                    }, function(e) { q.reject(e); });
+                            }, function(e) { q.reject(e); });
+
+                    }).
+                    error(function(data, status) {
+                        q.reject('could not retrieve rest:api "'+id+'"');
+                    });
+            }
+        } else {
+            console.log('building api specification "'+id+'"')
+            q.resolve(_buildApi_really(node))
+        }
+        return q.promise;
     };
 
     var _buildLicense = function(node) {
@@ -531,19 +573,65 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         return terms;
     };
 
+    var _pmap = function(p, fn) {
+        var q = $q.defer();
+        p.then(function(x) {
+            try { q.resolve(fn(x)); }
+            catch(e) { q.reject(e); }
+        }, function(e) { q.reject(e); });
+        return q.promise;
+    };
+    var _pmap2 = function(p1, p2, fn) {
+        var q = $q.defer();
+        p1.then(function(x) {
+            p2.then(function(y) {
+                try { q.resolve(fn(x, y)); }
+                catch(e) { q.reject(e); }
+            }, function(e) { q.reject(e); });
+        }, function(e) { q.reject(e); });
+        return q.promise;
+    }
+    var _pflatmap = function(p, fn) {
+        var q = $q.defer();
+        p.then(function(x) {
+            try {
+                fn(x).then(
+                    function(y) {q.resolve(y);
+                }, function(e) { q.reject(e); });
+            } catch(e) { q.reject(e); }
+        }, function(e) { q.reject(e); });
+        return q.promise;
+    }
+    var _pseq = function(ps) {
+        if (ps.length == 0) {
+            var q = $q.defer();
+            q.resolve([]);
+            return q.promise;
+        } else {
+            var head = ps[0];
+            var tail = ps.slice(1, ps.length);
+            var cat = function(h, t) { return [h].concat(t); };
+            return _pmap2(head, _pseq(tail), cat);
+        }
+    };
+
     var _buildService = function(node) {
         node = X.Node(node);
-        var service = {};
+        console.log('building api specifications');
+        var apiPromises = _.map(node.children(NS.Rest('api')), _buildApi);
+        return _pmap(_pseq(apiPromises), function(apis) {
+            var service = {};
 
-        service.title = node.child(NS.Meta('title')).child().text();
-        service.subtitle = node.child(NS.Meta('subtitle')).child().text();
-        service.description = node.child(NS.Meta('description')).child().text();
+            service.apis = apis;
 
-        service.apis = _.map(node.children(NS.Rest('api')), _buildApi);
-        service.licenses = _.map(node.children(NS.Meta('license')), _buildLicense);
-        service.terms = _.map(node.children(NS.Meta('terms')), _buildTerms);
+            service.title = node.child(NS.Meta('title')).child().text();
+            service.subtitle = node.child(NS.Meta('subtitle')).child().text();
+            service.description = node.child(NS.Meta('description')).child().text();
 
-        return service;
+            service.licenses = _.map(node.children(NS.Meta('license')), _buildLicense);
+            service.terms = _.map(node.children(NS.Meta('terms')), _buildTerms);
+            return service;
+        })
     };
 
     var _buildSpec = function(xml) {
@@ -553,18 +641,21 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
             throw 'invalid namespace: ' + ns;
         }
 
-        return {
-            xml: xml,
-            service: _buildService(xml.domTree)
-        };
+        console.log('building service specification');
+        return _pmap(_buildService(xml.domTree), function(service) {
+            return {
+                xml: xml,
+                service: service
+            };
+        });
     };
 
     var _load = function(src) {
         var q = $q.defer();
         $http.get(src).
             success(function(data, status, header) {
-                _loadXML(data).then(
-                    function(xml) { q.resolve(_buildSpec(xml)); },
+                _pmap(_loadXML(data), _buildSpec).then(
+                    function(spec) { q.resolve(spec); },
                     function(e) { q.reject(e); });
             }).
             error(function(data, status) {

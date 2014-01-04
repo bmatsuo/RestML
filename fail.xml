@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rest:api id="fail"
+          baseUrl="http://fail.bmats.co"
+          version="5.14.3-9"
+          xmlns:rest="http://x.bmats.co/rest/2013.01"
+          xmlns:meta="http://x.bmats.co/rest-meta/2013.01"
+          xmlns:model="http://x.bmats.co/rest-model/2013.01">
+    <meta:title>Fails</meta:title>
+
+    <rest:group>
+        <meta:title>Epic</meta:title>
+        <meta:subtitle>ZOMFG!!1!</meta:subtitle>
+
+        <rest:resource id="epic" path="/epic">
+
+            <rest:action method="GET">
+                <meta:title>Find an epic fail</meta:title>
+                <rest:response status="2xx">
+                    <rest:model ref="fail"/>
+                </rest:response>
+            </rest:action>
+
+            <rest:action method="POST">
+                <meta:title>Upload an epic fail</meta:title>
+                <rest:param name="url" type="form" required="true">
+                    <model:restricts value="url"/>
+                    <model:maxLength value="1000"/>
+                </rest:param>
+                <rest:param name="count" type="form">
+                    <model:restricts value="positive-integer"/>
+                    <model:minExclusive value="0"/>
+                    <model:max value="1000"/>
+                </rest:param>
+                <rest:response status="3xx">
+                </rest:response>
+            </rest:action>
+
+        </rest:resource>
+    </rest:group>
+
+    <rest:model id="fail-media">
+        <meta:title>Faily Fail MacFailery</meta:title>
+        <meta:description>A funny video or picture of people failing.</meta:description>
+        <rest:view contentType="image/png"/>
+        <rest:view contentType="image/jpg"/>
+        <rest:view contentType="image/gif"/>
+        <rest:view contentType="video/mpeg-4"/>
+    </rest:model>
+</rest:api>

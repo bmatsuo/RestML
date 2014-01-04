@@ -11,7 +11,7 @@
     <xs:import namespace="http://x.bmats.co/rest-common/2013.01" schemaLocation="rest-common.xsd"/>
     <xs:import namespace="http://x.bmats.co/rest-meta/2013.01" schemaLocation="rest-meta.xsd"/>
 
-    <xs:element name="service" type="Service">
+    <xs:element name="listing" type="Service">
         <xs:annotation>
             <xs:documentation xml:lang="en">
                 A service document contains a set of API specifications. An API
@@ -33,11 +33,31 @@
             <xs:element ref="rest:api" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation xml:lang="en">
-                        The service's REST HTTP interface.
+                        An HTTP REST interface specification.
+                        Can either be a reference (empty w/ href) or a specification
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
         </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="APIRef">
+        <xs:attributeGroup ref="common:ID">
+            <xs:annotation>
+                <xs:documentation>
+                    The ID
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attributeGroup>
+        <xs:attribute name="href" type="xs:anyURI" use="required">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    A resolvable reference to a &lt;api&gt; XML document. When this
+                    is present no sub-elements or attributes other than "id" may be
+                    present.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
 
     <xs:complexType name="TermsOfService">
