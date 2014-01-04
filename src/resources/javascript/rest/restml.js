@@ -34,6 +34,8 @@ var X = function() {
         };
 
         var _attr = function() {
+            if (node === null)  return _Node(null);
+
             var nsuri, local;
             if (arguments.length === 2) {
                 nsuri = arguments[0];
@@ -50,40 +52,78 @@ var X = function() {
             } else {
                 a = node.getAttributeNode(local);
             }
-            if (a) a = new _Node(a);
+            a = _Node(a);
 
             return a;
         };
 
         var _find = function(filter) {
+            if (node === null)  return _Node(null);
+            throw 'unimplemented';
+        };
+
+        var _first = function(filter) {
+            if (node === null)  return _Node(null);
             throw 'unimplemented';
         };
 
         var _children = function(filter) {
-            var children = node.getChildNodes();
-
-            if (typeof filter === 'undefined') {
-                // noop
-            } else if (typeof filter === 'string') {
-                children = _filterNode(children, function(child) { return child.localName === filter; });
+            var children;
+            if (node === null) {
+                children = [];
             } else {
-                if (typeof filter.ns !== 'function' || typeof filter.local !== 'function') {
-                    return [];
+                children = node.getChildNodes();
+                if (typeof filter === 'undefined') {
+                    // noop
+                } else if (typeof filter === 'string') {
+                    children = _filterNode(children, function(child) { return child.localName === filter; });
+                } else {
+                    // duck typing here. is this the right thing to do?
+                    if (typeof filter.ns === 'function' || typeof filter.local === 'function') {
+                        var ns = filter.ns().uri();
+                        var local = filter.local();
+
+                        children = _filterNode(children, function(child) {
+                            return child.namespaceURI.toString() === ns && child.localName === local;
+                        });
+                    } else if (typeof filter.uri === 'function') {
+                        var ns = filter.uri();
+                        children = _filterNode(children, function(child) {
+                            return child.namespaceURI.toString() === ns;
+                        });
+                    }
                 }
-
-                var ns = filter.ns().uri();
-                var local = filter.local();
-
-                children = _filterNode(children, function(child) {
-                    return child.namespaceURI.toString() === ns && child.localName === local;
-                });
+                children = _mapNode(children, function(child) { return _Node(child) });
             }
-            children = _mapNode(children, function(child) { return new _Node(child) });
+            children.head = function() {
+                if (children.length === 0) {
+                    return X.Node(null);
+                }
+                return children[0];
+            };
+            return children;
+        };
 
-            return children
-        }
+        // TODO moar efficiency. remove the head() method.
+        var _firstChild = function(filter) { return _children(filter).head(); };
 
-        var _text = function() { return node.value.toString(); };
+        var _ns = function() {
+            if (node === null) return null;
+            var ns = node.namespaceURI.toString();
+            if (ns) return null;
+            return NS(ns);
+        };
+
+        var _local = function() {
+            if (node === null) return null;
+            return node.localName;
+        };
+
+        var _text = function() {
+            if (node === null) return null;
+
+            return node.nodeValue.toString();
+        };
         var _int = function() { return parseInt(_text()); };
         var _float = function() { return parseFloat(_text()); };
         var _bool = function() {
@@ -96,10 +136,13 @@ var X = function() {
         return {
             attr: _attr,
             children: _children,
+            child: _firstChild,
             text: _text,
             int: _int,
             float: _float,
             bool: _bool,
+            ns: _ns,
+            local: _local,
             node: function() { return node; }
         };
     };
@@ -107,12 +150,12 @@ var X = function() {
     var _NS = function(uri) {
         var self = function(local) {
             return {
-                ns: function() { return self; },
+                ns: function() { return _NS(uri); },
                 local: function() { return local; },
                 toString: function() { return '{' + uri + '}:' + local }
             };
         };
-        self.__proto__.uri = function() { return uri; };
+        self.uri = function() { return uri; };
         return self;
     };
 
@@ -157,6 +200,12 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         NS_MODEL = 'http://x.bmats.co/rest-model/2013.01',
         NS_META = 'http://x.bmats.co/rest-meta/2013.01',
         NS_REST = 'http://x.bmats.co/rest/2013.01';
+    var NS = {
+            Service: X.NS(NS_SERVICE),
+            Model: X.NS(NS_MODEL),
+            Meta: X.NS(NS_META),
+            Rest: X.NS(NS_REST)
+        };
 
     var _nodeListToArray = function(list) {
         var a = [];
@@ -344,21 +393,17 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
 
     var _buildParam = function(node) {
         var param = {};
-        param.name = node.getAttribute('name').toString();
-        param.type = node.getAttribute('type').toString();
-        param.required = Boolean(node.getAttribute('required').toString()); // defaults false
+        param.name = node.attr('name').text();
+        param.type = node.attr('type').text();
+        param.required = node.attr('required').bool(); // defaults false
         param.description = "??? description ???";
 
         param.model = {};
 
-        var constraints = node.getChildNodes();
-        constraints = _filterNode(constraints, function(child) {
-            return child.getNamespaceURI().toString() === NS_MODEL
-        });
-        constraints = _mapNode(constraints, function(child) {
+        var constraints = _.map(node.children(NS.Model), function(child) {
             return {
-                type: child.localName,
-                value: child.getAttribute('value').toString()
+                type: child.local(),
+                value: child.attr('value').text()
             };
         });
 
@@ -410,101 +455,93 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
     var _buildResponse = function(node) {
         var response = {};
 
-        response.statusCode = node.getAttribute('status').toString();
+        response.statusCode = node.attr('status').text();
         response.status = _statuses[response.statusCode];
-        response.models = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'model'), _buildModelRef);
+        response.models = _.map(node.children(NS.Rest('model')), _buildModelRef);
 
         return response;
     };
 
     var _buildAction = function(node) {
         var action = {};
-        action.method = node.getAttribute('method').toString();
+        action.method = node.attr('method').text();
 
-        action.title = _getMeta(node, 'title');
-        action.subtitle = _getMeta(node, 'subtitle');
-        action.description = _getMeta(node, 'description');
+        action.title = node.child(NS.Meta('title')).child().text();
+        action.subtitle = node.child(NS.Meta('subtitle')).child().text();
+        action.description = node.child(NS.Meta('description')).child().text();
 
-        action.params = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'param'), _buildParam);
-        action.responses = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'response'), _buildResponse);
+        action.params = _.map(node.children(NS.Rest('param')), _buildParam);
+        action.responses = _.map(node.children(NS.Rest('response')), _buildResponse);
 
         return action;
     };
 
     var _buildResource = function(node) {
-        var resource = {};
-
-        resource.path = node.getAttribute('path').toString();
-
-        resource.actions = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'action'), _buildAction);
-
-        resource = {
-            nickname: "watches",
-            path: resource.path,
-            actions: resource.actions
+        return {
+            nickname: "watches", // FIXME
+            path: node.attr('path').text(),
+            actions: _.map(node.children(NS.Rest('action')), _buildAction)
         };
-        return resource
     };
 
     var _buildGroup = function(node) {
-        var group = {};
-        group.title = _getMeta(node, 'title');
-        group.subtitle = _getMeta(node, 'subtitle');
-        group.description = _getMeta(node, 'description');
-
-        group.resources = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'resource'), _buildResource);
-
-        return group;
+        return {
+            title: node.child(NS.Meta('title')).child().text(),
+            subtitle: node.child(NS.Meta('subtitle')).child().text(),
+            description: node.child(NS.Meta('description')).child().text(),
+            resources: _.map(
+                node.children(NS.Rest('resource')),
+                _buildResource)
+        };
     };
 
     var _buildModel = function(node) {
         var model = {};
-        model.id = node.getAttribute('id').toString();
-        model.title = _getMeta(node, 'title');
-        model.subtitle = _getMeta(node, 'subtitle');
-        model.description = _getMeta(node, 'description');
+        model.id = node.attr('id').text();
+        model.title = node.child(NS.Meta('title')).child().text();
+        model.subtitle = node.child(NS.Meta('subtitle')).child().text();
+        model.description = node.child(NS.Meta('description')).child().text();
         return model;
     };
 
     var _buildApi = function(node) {
         var api = {};
-        api.title = _getMeta(node, 'title');
-        api.subtitle = _getMeta(node, 'subtitle');
-        api.description = _getMeta(node, 'description');
-
-        api.baseUrl = node.getAttribute('baseUrl').toString();
-        api.version = node.getAttribute('version').toString();
-
-        api.groups = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'group'), _buildGroup);
-        api.models = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'model'), _buildModel);
+        api.title = node.child(NS.Meta('title')).child().text();
+        api.subtitle = node.child(NS.Meta('subtitle')).child().text();
+        api.description = node.child(NS.Meta('description')).child().text();
+        api.baseUrl = node.attr('baseUrl').text();
+        api.version = node.attr('version').text();
+        api.groups = _.map(node.children(NS.Rest('group')), _buildGroup);
+        api.models = _.map(node.children(NS.Rest('model')), _buildModel);
 
         return api;
     };
 
     var _buildLicense = function(node) {
         var license = {};
-        license.type = node.getAttribute('type').toString();
-        license.href = node.getAttribute('href').toString();
+        license.type = node.attr('type').text();
+        license.href = node.attr('href').text();
         return license;
     };
 
     var _buildTerms = function(node) {
         var terms = {};
-        terms.type = node.getAttribute('type').toString();
-        terms.href = node.getAttribute('href').toString();
+        terms.type = node.attr('type').text();
+        terms.href = node.attr('href').text();
         return terms;
     };
 
     var _buildService = function(node) {
+        node = X.Node(node);
         var service = {};
 
-        service.title = _getMeta(node, 'title');
-        service.subtitle = _getMeta(node, 'subtitle');
-        service.description = _getMeta(node, 'description');
+        service.title = node.child(NS.Meta('title')).child().text();
+        service.subtitle = node.child(NS.Meta('subtitle')).child().text();
+        service.description = node.child(NS.Meta('description')).child().text();
 
-        service.apis = _mapNode(_getChildrenByTagNameNS(node, NS_REST, 'api'), _buildApi);
-        service.licenses = _mapNode(_getChildrenByTagNameNS(node, NS_META, 'license'), _buildLicense);
-        service.terms = _mapNode(_getChildrenByTagNameNS(node, NS_META, 'terms'), _buildTerms);
+        service.apis = _.map(node.children(NS.Rest('api')), _buildApi);
+        service.licenses = _.map(node.children(NS.Meta('license')), _buildLicense);
+        service.terms = _.map(node.children(NS.Meta('terms')), _buildTerms);
 
         return service;
     };
