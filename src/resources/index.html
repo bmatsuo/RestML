@@ -22,7 +22,8 @@
                     <p>{{group.description}}</p>
 
                     <div ng-repeat="resource in group.resources">
-                        <rest-action ng-repeat="action in resource.actions" resource="resource" action="action">
+                        <rest-action ng-repeat="action in resource.actions"
+                                     resource="resource" action="action"><!-- attrs used for making requests -->
                             <div class="panel panel-default">
                                 <div class="panel-heading action-header">
                                     <div class="row">
@@ -44,10 +45,6 @@
                                                 {{param.name}}: {{param.model.baseType}}
                                             </label>
                                         </td>
-                                        <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-                                            <!-- TODO use a directive to add the rest-action-param class -->
-                                            <input name="{{param.name}}" type="text" class="rest-action-param" id="resource_{{resource.nickname}}-{{action.method}}-param_{{param.name}}">
-                                        </td>
                                         <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" ng-class="{'text-muted': !param.required}">
                                             {{param.type}}
                                         </td>
@@ -56,6 +53,22 @@
                                                 (optional)
                                             </span>
                                         </td>
+                                        <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                                            <!-- TODO use a directive to add the rest-action-param class -->
+                                            <input name="{{param.name}}" type="text" class="rest-action-param pull-right" id="resource_{{resource.nickname}}-{{action.method}}-param_{{param.name}}">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>
+                                            <button type="submit" class="btn btn-primary pull-right">
+                                                Try it out!
+                                                <span class="glyphicon glyphicon-transfer"></span>
+                                            </button>
+                                        </td>
+
                                     </tr>
                                 </table>
 
@@ -94,10 +107,6 @@
                                             </ul>
                                         </li>
                                     </ul>
-                                </div>
-
-                                <div class="panel-body">
-                                    <button type="submit" class="btn btn-primary">Try it out!</button>
                                 </div>
 
                                 <div class="panel-body">
