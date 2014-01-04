@@ -531,22 +531,19 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
                 console.log('NOTICE: fetching rest:api "'+id+'"');
                 $http.get(href).
                     success(function(data, status) {
-                        _loadXML(data).
-                            then(function(xml) {
-                                _buildApi(X.Node(xml.domTree)). // FIXME i'm losing information here.
-                                    then(function(api) {
-                                        if (api.id !== id) {
-                                            var msg = 'rest:api at '+href;
-                                            msg += ' has id "'+api.id+'"';
-                                            msg += ' when id "'+id+'"';
-                                            msg += ' is expected';
-                                            q.reject(msg)
-                                        } else {
-                                            q.resolve(api);
-                                        }
-                                    }, function(e) { q.reject(e); });
-                            }, function(e) { q.reject(e); });
-
+                        _pflatmap(_loadXML(data), function(xml) {
+                            return _pmap(_buildApi(X.Node(xml.domTree)), function(api) { // FIXME i'm losing information here.
+                                if (api.id !== id) {
+                                    var msg = 'rest:api at '+href;
+                                    msg += ' has id "'+api.id+'"';
+                                    msg += ' when id "'+id+'"';
+                                    msg += ' is expected';
+                                    q.reject(msg)
+                                } else {
+                                    q.resolve(api);
+                                }
+                            })
+                        })
                     }).
                     error(function(data, status) {
                         q.reject('could not retrieve rest:api "'+id+'"');
@@ -573,35 +570,37 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         return terms;
     };
 
+    var _async = function(fn) {
+        return function() {
+            var args = arguments;
+            var q = $q.defer();
+            setTimeout(function(){
+                $rootScope.$apply(function() {
+                    try { q.resolve(fn.apply(this, args)); }
+                    catch(e) { q.reject(e); }
+                });
+            }, 0);
+            return q.promise;
+        }
+    };
     var _pmap = function(p, fn) {
-        var q = $q.defer();
-        p.then(function(x) {
-            try { q.resolve(fn(x)); }
-            catch(e) { q.reject(e); }
-        }, function(e) { q.reject(e); });
-        return q.promise;
+        return _pflatmap(p, _async(fn));
     };
     var _pmap2 = function(p1, p2, fn) {
-        var q = $q.defer();
-        p1.then(function(x) {
-            p2.then(function(y) {
-                try { q.resolve(fn(x, y)); }
-                catch(e) { q.reject(e); }
-            }, function(e) { q.reject(e); });
-        }, function(e) { q.reject(e); });
-        return q.promise;
-    }
+        return _pflatmap(p1, function(x) {
+            return _pmap(p2, function(y) {
+                return fn(x, y);
+            });
+        })
+    };
     var _pflatmap = function(p, fn) {
         var q = $q.defer();
         p.then(function(x) {
-            try {
-                fn(x).then(
-                    function(y) {q.resolve(y);
-                }, function(e) { q.reject(e); });
-            } catch(e) { q.reject(e); }
-        }, function(e) { q.reject(e); });
+            try { fn(x).then(q.resolve, q.reject); }
+            catch(e) { q.reject(e); }
+        }, q.reject);
         return q.promise;
-    }
+    };
     var _pseq = function(ps) {
         if (ps.length == 0) {
             var q = $q.defer();
@@ -654,9 +653,8 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         var q = $q.defer();
         $http.get(src).
             success(function(data, status, header) {
-                _pmap(_loadXML(data), _buildSpec).then(
-                    function(spec) { q.resolve(spec); },
-                    function(e) { q.reject(e); });
+                _pmap(_loadXML(data), _buildSpec).
+                    then(q.resolve, q.reject);
             }).
             error(function(data, status) {
                 console.log('could not retreive data:', src)
