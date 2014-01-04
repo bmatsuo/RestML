@@ -2,7 +2,8 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns="http://x.bmats.co/rest-common/2013.01"
            targetNamespace="http://x.bmats.co/rest-common/2013.01"
-           elementFormDefault="qualified">
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
     <xs:simpleType name="text">
         <xs:restriction base="xs:string">
             <xs:whiteSpace value="collapse"/>
@@ -76,5 +77,27 @@
             <!--xs:enumeration value="file"/-->
         </xs:restriction>
     </xs:simpleType>
+
+    <xs:attributeGroup name="ID">
+        <xs:attribute name="id" type="xs:ID" use="required">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    IDs are used as handles to be referenced from other sections/documents.
+                    They are also used in the generation of unique HTML "id" attributes.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:attributeGroup>
+
+    <xs:attributeGroup name="IDREF">
+        <xs:attribute name="ref" type="xs:IDREF" use="required">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    IDRefs make reference to an element's "id" attribute. These may be turned
+                    into HTML anchors (&lt;a&gt;).
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:attributeGroup>
 
 </xs:schema>

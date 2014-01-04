@@ -19,10 +19,21 @@
             <xs:element name="group" type="Group" maxOccurs="unbounded"/>
             <xs:element name="model" type="Model" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
+        <xs:attributeGroup ref="common:ID"/>
+        <xs:attribute name="href" type="common:httpURI" use="prohibited"><!-- FIXME -->
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    A resolvable reference to a &lt;api&gt; XML document. When this
+                    is present no sub-elements or attributes other than "id" may be
+                    present.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
         <xs:attribute name="version" type="xs:token">
             <xs:annotation>
                 <xs:documentation>
-                    The service API version.
+                    The service API version. This may be a semantic version, a
+                    daily release number, a git commit hash, a combination, ...
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
@@ -48,6 +59,7 @@
             <!-- meta:description -->
             <xs:element name="action" type="Action" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
+        <xs:attributeGroup ref="common:ID"/>
         <xs:attribute name="path" type="common:absolutePath" use="required"/>
     </xs:complexType>
 
@@ -83,11 +95,11 @@
             <xs:group ref="meta:About"/>
             <xs:element name="view" type="View" maxOccurs="unbounded"/>
         </xs:sequence>
-        <xs:attribute name="id" type="xs:NCName" use="required"/>
+        <xs:attributeGroup ref="common:ID"/>
     </xs:complexType>
 
     <xs:complexType name="ModelRef">
-        <xs:attribute name="ref" type="xs:NCName" use="required"/>
+        <xs:attributeGroup ref="common:IDREF"/>
     </xs:complexType>
 
     <xs:complexType name="View">

@@ -10,14 +10,16 @@
     <meta:license type="Apache 2.0" href="http://www.apache.org/licenses/LICENSE-2.0.html"/>
     <meta:terms type="Terms of Service" href="http://bmats.co/terms"/>
 
-    <rest:api baseUrl="http://meme.bmats.co" version="2.29.5-E">
+    <rest:api id="meme"
+              baseUrl="http://meme.bmats.co"
+              version="2.29.5-E">
         <meta:title>Memes</meta:title>
 
         <rest:group>
             <meta:title>Cats</meta:title>
             <meta:subtitle>u can haz</meta:subtitle>
 
-            <rest:resource path="/cats">
+            <rest:resource id="cats" path="/cats">
                 <rest:action method="GET">
                     <meta:title>Find a cat</meta:title>
                     <rest:param name="caption" type="query">
@@ -26,12 +28,12 @@
                         <model:enumeration value="meow meow"/>
                     </rest:param>
                     <rest:response status="2xx">
-                        <rest:model ref="ok"/>
+                        <rest:model ref="status-ok"/>
                     </rest:response>
                 </rest:action>
             </rest:resource>
 
-            <rest:resource path="/bar"/>
+            <rest:resource id="bar" path="/bar"/>
         </rest:group>
 
         <rest:group>
@@ -39,7 +41,7 @@
             <meta:subtitle>SUCCESS!</meta:subtitle>
         </rest:group>
 
-        <rest:model id="ok">
+        <rest:model id="status-ok">
             <meta:title>OK</meta:title>
             <meta:description>A generic success message with no extra information.</meta:description>
             <rest:view contentType="text/plain"/>
@@ -48,13 +50,16 @@
         </rest:model>
     </rest:api>
 
-    <rest:api baseUrl="http://fail.bmats.co" version="5.14.3-9">
+    <rest:api id="fail"
+              baseUrl="http://fail.bmats.co"
+              version="5.14.3-9">
         <meta:title>Fails</meta:title>
 
         <rest:group>
             <meta:title>Epic</meta:title>
             <meta:subtitle>ZOMFG!!1!</meta:subtitle>
-            <rest:resource path="/epic">
+
+            <rest:resource id="epic" path="/epic">
 
                 <rest:action method="GET">
                     <meta:title>Find an epic fail</meta:title>
@@ -81,7 +86,7 @@
             </rest:resource>
         </rest:group>
 
-        <rest:model id="fail">
+        <rest:model id="fail-media">
             <meta:title>Faily Fail MacFailery</meta:title>
             <meta:description>A funny video or picture of people failing.</meta:description>
             <rest:view contentType="image/png"/>
