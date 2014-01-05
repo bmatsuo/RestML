@@ -435,13 +435,7 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
     };
 
     var _buildModelRef = function(node) {
-        // FIXME no xml representation
-        var model = {};
-        model = {
-            title: "OK",
-            description: "A generic success message"
-        }
-        return model;
+        return { ref: node.attr('ref').text() };
     };
 
     var _statuses = {
@@ -504,6 +498,13 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         return model;
     };
 
+    var _toObject = function(arr, sel) {
+        if (typeof sel === 'undefined' || sel === '') sel = 'id'
+        var o = {};
+        _.each(arr, function(v) { o[v[sel]] = v; })
+        return o;
+    };
+
     var _buildApi_really = function(node) {
         var api = {};
 
@@ -514,7 +515,8 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         api.baseUrl = node.attr('baseUrl').text();
         api.version = node.attr('version').text();
         api.groups = _.map(node.children(NS.Rest('group')), _buildGroup);
-        api.models = _.map(node.children(NS.Rest('model')), _buildModel);
+        api.models = _toObject(_.map(node.children(NS.Rest('model')), _buildModel));
+        console.log('apis "'+api.id+'"', api.models);
 
         return api;
     }

@@ -2,8 +2,9 @@
 <html ng-app="restApp" ng-controller="restController">
     <head>
         <title ng-bind="title"></title>
-        <script type="text/javascript" src="javascript/angular-1.2.6/angular.min.js"></script>
         <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="rest/rest.css"/>
+        <script type="text/javascript" src="javascript/angular-1.2.6/angular.min.js"></script>
     </head>
     <body>
     <div class="container">
@@ -14,7 +15,7 @@
             <p>{{description}}</p>
 
             <div ng-repeat="api in apis" spec="api">
-                <h3>{{api.title}} <small>{{api.subtitle}}</small></h3>
+                <h2>{{api.title}} <small>{{api.subtitle}}</small></h2>
                 <p>{{api.description}}</p>
 
                 <div ng-repeat="group in api.groups">
@@ -72,10 +73,10 @@
                                                         <ul style="list-style-type: none;" class="model-list">
                                                             <li ng-repeat="model in response.models" class="model">
                                                                 <div>
-                                                        <span>
-                                                            <strong>{{model.title}} <small>{{model.subtitle}}</small> </strong>
-                                                        </span>
-                                                                    <span>{{model.description}}</span>
+                                                                    <span>
+                                                                        <strong>{{api.models[model.ref].title}} <small>{{api.models[model.ref].subtitle}}</small> </strong>
+                                                                    </span>
+                                                                    <span>{{api.models[model.ref].description}}</span>
                                                                 </div>
                                                                 <!--rest-model spec="model">Schema...</rest-model-->
                                                             </li>
@@ -165,7 +166,7 @@
     <script type="text/javascript" src="javascript/xml_for_script-3.1/jsXMLParser/xmlsax.js"></script>
     <!-- TODO END -->
 
-    <script type="text/javascript" src="javascript/rest/restml.js"></script>
-    <script type="text/javascript" src="javascript/rest/app.js"></script>
+    <script type="text/javascript" src="rest/restml.js"></script>
+    <script type="text/javascript" src="rest/app.js"></script>
     </body>
 </html>
