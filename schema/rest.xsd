@@ -57,7 +57,18 @@
     <xs:complexType name="Resource">
         <xs:sequence>
             <!-- meta:description -->
-            <xs:element name="action" type="Action" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="action" type="Action" minOccurs="0" maxOccurs="unbounded">
+                <!-- FIXME these constraints are not being validated -->
+                <xs:unique name="UniqueNames">
+                    <xs:selector xpath="param"/>
+                    <xs:field xpath="@name"/>
+                </xs:unique>
+
+                <xs:unique name="UniqueStatus">
+                    <xs:selector xpath="response"/>
+                    <xs:field xpath="@status"/>
+                </xs:unique>
+            </xs:element>
         </xs:sequence>
         <xs:attributeGroup ref="common:ID"/>
         <xs:attribute name="path" type="common:absolutePath" use="required"/>
@@ -67,7 +78,12 @@
         <xs:sequence>
             <xs:group ref="meta:About"/>
             <xs:element name="param" type="Parameter" minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element name="response" type="Response" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="response" type="Response" minOccurs="0" maxOccurs="unbounded">
+                <xs:unique name="UniqueRefs">
+                    <xs:selector xpath="*"/>
+                    <xs:field xpath="ref"/>
+                </xs:unique>
+            </xs:element>
         </xs:sequence>
         <xs:attribute name="method" type="common:httpMethod" use="required"/>
     </xs:complexType>
@@ -94,6 +110,7 @@
         <xs:sequence>
             <xs:group ref="meta:About"/>
             <xs:element name="view" type="View" maxOccurs="unbounded"/>
+            <xs:group ref="model:model" minOccurs="0"/>
         </xs:sequence>
         <xs:attributeGroup ref="common:ID"/>
     </xs:complexType>

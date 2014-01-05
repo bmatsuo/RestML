@@ -22,6 +22,9 @@
                 <rest:response status="2xx">
                     <rest:model ref="status-ok"/>
                 </rest:response>
+                <rest:response status="4xx">
+                    <rest:model ref="client-error"/>
+                </rest:response>
             </rest:action>
         </rest:resource>
 
@@ -39,5 +42,21 @@
         <rest:view contentType="text/plain"/>
         <rest:view contentType="text/xml"/>
         <rest:view contentType="application/json"/>
+    </rest:model>
+    <rest:model id="client-error">
+        <meta:title>Error</meta:title>
+        <meta:description>Errors returned by the API have a common base structure</meta:description>
+        <rest:view contentType="text/plain"/>
+        <rest:view contentType="text/csv"/>
+        <rest:view contentType="text/xml"/>
+        <rest:view contentType="application/json"/>
+        <model:extends value="keyed"/>
+        <model:key name="error">
+            <model:restricts value="string"/>
+            <model:enumeration value="InvalidParameter"/>
+        </model:key>
+        <model:key name="reason">
+            <model:restricts value="string"/>
+        </model:key>
     </rest:model>
 </rest:api>

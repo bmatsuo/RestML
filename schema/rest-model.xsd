@@ -54,6 +54,17 @@
         </xs:restriction>
     </xs:simpleType>
 
+    <xs:group name="model">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                In general models can be either primitive or structured.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice>
+            <xs:group ref="primitiveModel"/>
+            <xs:group ref="structuredModel"/>
+        </xs:choice>
+    </xs:group>
 
     <xs:group name="primitiveModel">
         <xs:annotation>
@@ -76,6 +87,31 @@
             </xs:choice>
         </xs:sequence>
     </xs:group>
+
+    <xs:group name="structuredModel">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                A primitive model specification. The specified class of values
+                must be a chain of restrictions on a simple type (this may change
+                in future versions).
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:group ref="extension"/>
+            <xs:choice>
+                <xs:element ref="key" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:choice>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:element name="key" type="Key"/>
+    <xs:complexType name="Key">
+        <xs:choice>
+            <xs:group ref="primitiveModel"/>
+            <xs:group ref="structuredModel"/>
+        </xs:choice>
+        <xs:attribute name="name" type="xs:NCName" use="required"/>
+    </xs:complexType>
 
     <xs:group name="anyModel">
         <xs:annotation>
