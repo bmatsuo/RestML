@@ -24,7 +24,7 @@
 
                     <div ng-repeat="resource in group.resources">
                         <rest-action ng-repeat="action in resource.actions"
-                                     resource="resource" action="action"><!-- attrs used for making requests -->
+                                     api="api" resource="resource" action="action"><!-- attrs used for making requests -->
                             <div class="panel panel-default">
                                 <div class="panel-heading action-header">
                                     <div class="row">
@@ -92,7 +92,7 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr ng-hide="action.method === 'GET' || action.method === 'DELETE'">
                                         <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
                                             <label for="content-type" class="control-label">Content-Type</label>
                                         </td>

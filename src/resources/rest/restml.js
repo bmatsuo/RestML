@@ -737,28 +737,51 @@ restml.directive('rest', ['restSpec', function(restSpec) {
     };
 }]);
 
-restml.directive('restAction', ['restSpec', function(restSpec) {
+restml.directive('restAction', ['$http', 'restSpec', function($http, $httpProvider, restSpec) {
     var template = '';
     template += '<div class="rest-action">';
     template += '<form ng-submit="submit()" ng-transclude></form>';
     template += '</div>';
+
+    //$http.defaults.headers.common = {};
+    //$http.defaults.headers.post = {};
+    //$http.defaults.headers.put = {};
+
     return {
         template: template,
         restrict: "E",
         replace: true,
         transclude: true,
         scope: {
+            api: '=',
             resource: '=',
             action: '='
         },
         link: function($scope, element) {
             $scope.submit = function() {
+                var method = $scope.action.method,
+                    baseUrl = $scope.api.baseUrl,
+                    path = $scope.resource.path,
+                    url = baseUrl + path;
+
                 // retreive parameter values
                 var params = {};
-                var paramElements = element.contents()[0].getElementsByClassName('rest-action-param');
-                paramElements = _.map(paramElements, function(elem) { return angular.element(elem); });
-                _.each(paramElements, function(elem) { params[elem.attr('name')] = elem.val(); });
-                console.log('params:', params);
+                var _params = element.contents()[0].getElementsByClassName('rest-action-param');
+                _params = _.map(_params, function(elem) { return angular.element(elem); });
+                _.each(_params, function(elem) { params[elem.attr('name')] = elem.val(); });
+                // TODO validate parameters
+
+                var query = $scope.action.params;
+                query = _.filter(query, function(param) { return param.type === 'query'; });
+                query = _.map(query, function(param) { return [param.name, params[param.name]]; });
+                query = _.object(query);
+
+                var form = $scope.action.params;
+                form = _.filter(form, function(param) { return param.type === 'form' });
+                form = _.map(form, function(param) { return [param.name, params[param.name]] });
+                form = _.object(form);
+
+                var headers = {}
 
                 // compute acceptable content-types
                 var accepts = [];
@@ -766,7 +789,31 @@ restml.directive('restAction', ['restSpec', function(restSpec) {
                 acceptElements = _.map(acceptElements, function(elem) { return angular.element(elem); });
                 accepts = _.map(acceptElements, function(elem) { return elem.val(); });
                 accepts.push('*/*')
+                headers['Accept'] = accepts.join(',');
+
+                if (method === 'POST' || method === 'PUT') {
+                    var contentType = _.first(element.contents());
+                    contentType = contentType.getElementsByClassName('rest-content-type')
+                    contentType = _.map(contentType, function(elem) { return angular.element(elem); });
+                    contentType = _.map(contentType, function(elem) { return elem.val(); });
+                    contentType = _.first(contentType);
+                    headers['Content-Type'] = contentType + '; charset="utf-8"';
+                }
+
+                console.log('method:', method);
+                console.log('url:', url);
+                console.log('query:', query);
+                console.log('header:', headers);
+                console.log('form:', form);
                 console.log('accept:', accepts)
+
+                $http({
+                    method: method,
+                    url: url,
+                    params: query,
+                    headers: headers,
+                    data: form
+                })
             };
         }
     };
