@@ -659,9 +659,31 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
     };
 }]);
 
+restml.directive('restApi', ['restSpec', function(restSpec) {
+    return {
+        template: '<div class="rest-api" ng-transclude></div>',
+        restrict: "E",
+        replace: true,
+        transclude: true,
+        scope: { },
+        link: function($scope, element) { }
+    };
+}]);
+
+restml.directive('restSubmit', ['restSpec', function(restSpec) {
+    return {
+        template: '<button type="submit" class="rest-submit" ng-transclude></button>',
+        restrict: "E",
+        replace: true,
+        transclude: true,
+        scope: { },
+        link: function($scope, element) { }
+    };
+}]);
+
 restml.directive('rest', ['restSpec', function(restSpec) {
     return {
-        template: '<div class="restml service-specification" ng-transclude></div>',
+        template: '<div class="rest-service" ng-transclude></div>',
         restrict: "E",
         replace: true,
         transclude: true,
@@ -717,8 +739,8 @@ restml.directive('rest', ['restSpec', function(restSpec) {
 
 restml.directive('restAction', ['restSpec', function(restSpec) {
     var template = '';
-    template += '<div class="restml action-specification">';
-    template += '<form ng-submit="submit()" ng-transclude></form>'
+    template += '<div class="rest-action">';
+    template += '<form ng-submit="submit()" ng-transclude></form>';
     template += '</div>';
     return {
         template: template,

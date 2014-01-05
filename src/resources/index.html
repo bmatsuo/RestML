@@ -2,7 +2,7 @@
 <html ng-app="restApp" ng-controller="restController">
     <head>
         <title ng-bind="title"></title>
-        <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css"/>
         <link rel="stylesheet" href="rest/rest.css"/>
         <script type="text/javascript" src="javascript/angular-1.2.6/angular.min.js"></script>
     </head>
@@ -14,7 +14,7 @@
             <h1>{{title}} <small>{{subtitle}}</small></h1>
             <p>{{description}}</p>
 
-            <div ng-repeat="api in apis" spec="api">
+            <rest-api ng-repeat="api in apis">
                 <h2>{{api.title}} <small>{{api.subtitle}}</small></h2>
                 <p>{{api.description}}</p>
 
@@ -60,7 +60,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                         <td colspan="2" rowspan="4">
+                                         <td colspan="2" rowspan="4" class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
                                             <div class="response-specification">
                                                 <ul class="list-unstyled response-list">
                                                     <li ng-repeat="response in action.responses" class="response">
@@ -74,9 +74,15 @@
                                                             <li ng-repeat="model in response.models" class="model">
                                                                 <div>
                                                                     <span>
-                                                                        <strong>{{api.models[model.ref].title}} <small>{{api.models[model.ref].subtitle}}</small> </strong>
+                                                                        <a>
+                                                                            <span tooltip-placement="right" tooltip="{{api.models[model.ref].description}}">
+                                                                                <strong>
+                                                                                    {{api.models[model.ref].title}}
+                                                                                    <small>{{api.models[model.ref].subtitle}}</small>
+                                                                                </strong>
+                                                                            </span>
+                                                                        </a>
                                                                     </span>
-                                                                    <span>{{api.models[model.ref].description}}</span>
                                                                 </div>
                                                                 <!--rest-model spec="model">Schema...</rest-model-->
                                                             </li>
@@ -87,8 +93,10 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td><label for="content-type" class="control-label">Content-Type</label></td>
-                                        <td>
+                                        <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                            <label for="content-type" class="control-label">Content-Type</label>
+                                        </td>
+                                        <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
                                             <div class="content-type-specification">
                                                 <!-- TODO use a directive to add the rest-action-accept class -->
                                                 <select id="content-type" class="form-control rest-content-type" name="rest-content-type">
@@ -99,8 +107,10 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td><label for="accept" class="control-label">Accept</label></td>
-                                        <td>
+                                        <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                            <label for="accept" class="control-label">Accept</label>
+                                        </td>
+                                        <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
                                             <div class="accept-specification">
                                                 <!-- TODO use a directive to add the rest-action-accept class -->
                                                 <select id="accept" class="form-control rest-action-accept" name="rest-accept-type">
@@ -113,10 +123,10 @@
                                     <tr>
                                         <td colspan="1"></td>
                                         <td>
-                                            <button type="submit" class="btn btn-primary pull-right">
-                                                Try it out!
+                                            <rest-submit class="btn btn-primary pull-right">
+                                                <span class="messasg">Try it out!</span>
                                                 <span class="glyphicon glyphicon-transfer"></span>
-                                            </button>
+                                            </rest-submit>
                                         </td>
 
                                     </tr>
@@ -138,7 +148,7 @@
                         </rest-action>
                     </div>
                 </div>
-            </div>
+            </rest-api>
 
             <div class="footer legal">
                 <div class="license-list">
@@ -156,8 +166,8 @@
         </rest>
     </div>
 
-    <script type="text/javascript" src="https://code.jquery.com/jquery.js"></script>
-    <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+    <!--script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-0.9.0.js"></script-->
+    <script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.9.0.js"></script>
 
     <script type="text/javascript" src="javascript/underscore-min.js"></script>
 
