@@ -848,7 +848,6 @@ restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeou
 
                 var url = $scope.api.baseUrl + $scope.resource.path; // FIXME render path param templates
                 $scope.demo.url = url;
-                _demoCallback('url');
 
                 var method = $scope.action.method;
                 $scope.demo.method = method;
@@ -859,6 +858,9 @@ restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeou
                 query = _.filter(query, function(param) { return param.type === 'query'; });
                 query = _.map(query, function(param) { return [param.name, config.params[param.name].value]; });
                 query = _.object(query);
+
+                var _query = _encode['application/x-www-form-urlencoded'](query);
+                if (query) $scope.demo.url += '?' + _query;
 
                 var header = [];
 
