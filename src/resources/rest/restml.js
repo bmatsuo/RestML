@@ -737,7 +737,7 @@ restml.directive('rest', ['restSpec', function(restSpec) {
     };
 }]);
 
-restml.directive('restAction', ['$http', 'restSpec', function($http, $httpProvider, restSpec) {
+restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeout, $http, $httpProvider, restSpec) {
     var template = '';
     template += '<div class="rest-action">';
     template += '<form ng-submit="submit(config)" ng-transclude></form>';
@@ -785,6 +785,22 @@ restml.directive('restAction', ['$http', 'restSpec', function($http, $httpProvid
                 ];
             };
 
+            _onDemoCallbacks = {};
+            this.onDemo = function(key, callback) {
+                $scope.$watch('demo.'+key, callback);
+                //var cbs = _onDemoCallbacks[key];
+                //if (!cbs) cbs = [];
+                //cbs.push(callback);
+                //_onDemoCallbacks[key] = cbs;
+            };
+            var _demoCallback = function(key) {
+                var cbs = _onDemoCallbacks[key];
+                _.each(cbs, function(cb) {
+                    var val = $scope.demo[key];
+                    $timeout(function() { cb(val); }, 0);
+                });
+            };
+
             $scope.config = {
                 params: (function() {
                     var ps = $scope.action.params;
@@ -820,8 +836,12 @@ restml.directive('restAction', ['$http', 'restSpec', function($http, $httpProvid
                 // TODO validate parameters
 
                 var url = $scope.api.baseUrl + $scope.resource.path; // FIXME render path param templates
+                $scope.demo.url = url;
+                _demoCallback('url');
 
                 var method = $scope.action.method;
+                $scope.demo.method = method;
+                _demoCallback('method');
                 var hasBody = method == 'POST' || method == 'PUT'
 
                 var query = $scope.action.params;
@@ -834,31 +854,204 @@ restml.directive('restAction', ['$http', 'restSpec', function($http, $httpProvid
                 form = _.map(form, function(param) { return [param.name, config.params[param.name].value] });
                 form = _.object(form);
 
-                var headers = {}
+                var header = [];
 
                 var accepts = []
                 if (config.accept) {
                     accepts.push(config.accept);
                 }
                 accepts.push('*/*')
-                headers['Accept'] = accepts.join(',');
+                header.push({
+                    name: 'Accept',
+                    value: accepts.join(',')
+                });
 
                 if (hasBody) {
                     if (config.contentType) {
-                        headers['Content-Type'] = config.contentType + '; charset=utf-8';
+                        header.push({
+                            name: 'Content-Type',
+                            value: config.contentType + '; charset=utf-8'
+                        });
                     }
                 }
+
+                $scope.demo.header = header;
+                _demoCallback('header');
+
+                var headers = _.object(_.map(header, function(h) { return [h.name, h.value]; }))
+
+                $scope.demo.body = 'FIXME';
+                _demoCallback('body');
 
                 console.log('method:', method);
                 console.log('url:', url);
                 console.log('query:', query);
                 console.log('header:', headers);
                 console.log('form:', form);
-                console.log('accept:', accepts)
+
+                $scope.demo.response = {};
+                $scope.demo.inProgress = true;
+
+                $timeout(function() {
+                    $scope.demo.hasRun = true;
+                    $scope.demo.inProgress = false;
+
+                    $scope.demo.response.status = '200 OK';
+                    $scope.demo.response.header = [
+                        {
+                            name: 'Content-Type',
+                            value: 'application/fixme'
+                        }
+                    ];
+                    $scope.demo.response.body = 'bobobobob';
+                    _demoCallback('response');
+                }, 1000)
             };
         }
     };
 }]);
+
+restml.directive('restDemoUrl', function() {
+    var template = '';
+    template += '<div class="rest-demo-uri {{class}}" ng-bind="url"></div>';
+
+    return {
+        require: '^restAction',
+        template: template,
+        restrict: 'E',
+        scope: {
+            class: '@'
+        },
+        link: function(scope, element, attrs, actionCtrl) {
+            element.removeAttr('class');
+            actionCtrl.onDemo('url', function(value) {
+                scope.url = value;
+            });
+        }
+    };
+});
+
+restml.directive('restDemoHeader', function() {
+    var template = '';
+    template += '<ul class="rest-demo-header {{class}}">';
+    template += '<li';
+    template += ' ng-repeat="header in list"';
+    template += ' class="{{itemClass}}"';
+    template += '>';
+    template += '<span class="header-name">{{header.name}}</span>';
+    template += ': ';
+    template += '<span class="header-value">{{header.value}}</span>';
+    template += '</li>';
+    template += '</ul>';
+
+    return {
+        require: '^restAction',
+        template: template,
+        restrict: 'E',
+        scope: {
+            class: '@',
+            itemClass: '@'
+        },
+        link: function(scope, element, attrs, actionCtrl) {
+            element.removeAttr('class');
+            element.removeAttr('itemClass');
+            actionCtrl.onDemo('header', function(value) {
+                scope.list = value;
+            })
+        }
+    };
+});
+
+restml.directive('restDemoBody', function() {
+    var template = '';
+    template += '<div class="rest-demo-body {{class}}" ng-bind="body"></div>';
+
+    return {
+        require: '^restAction',
+        template: template,
+        restrict: 'E',
+        scope: {
+            class: '@'
+        },
+        link: function(scope, element, attrs, actionCtrl) {
+            element.removeAttr('class');
+            actionCtrl.onDemo('body', function(value) {
+                scope.body = value;
+            });
+        }
+    };
+});
+
+restml.directive('restDemoResponseStatus', function() {
+    var template = '';
+    template += '<div class="rest-demo-body {{class}}" ng-bind="status"></div>';
+
+    return {
+        require: '^restAction',
+        template: template,
+        restrict: 'E',
+        scope: {
+            class: '@'
+        },
+        link: function(scope, element, attrs, actionCtrl) {
+            element.removeAttr('class');
+            actionCtrl.onDemo('response.status', function(value) {
+                scope.status = value;
+            });
+        }
+    };
+});
+
+restml.directive('restDemoResponseHeader', function() {
+    var template = '';
+    template += '<ul class="rest-demo-header {{class}}">';
+    template += '<li';
+    template += ' ng-repeat="header in list"';
+    template += ' class="{{itemClass}}"';
+    template += '>';
+    template += '<span class="header-name">{{header.name}}</span>';
+    template += ': ';
+    template += '<span class="header-value">{{header.value}}</span>';
+    template += '</li>';
+    template += '</ul>';
+
+    return {
+        require: '^restAction',
+        template: template,
+        restrict: 'E',
+        scope: {
+            class: '@',
+            itemClass: '@'
+        },
+        link: function(scope, element, attrs, actionCtrl) {
+            element.removeAttr('class');
+            element.removeAttr('itemClass');
+            actionCtrl.onDemo('response.header', function(value) {
+                scope.list = value;
+            })
+        }
+    };
+});
+
+restml.directive('restDemoResponseBody', function() {
+    var template = '';
+    template += '<div class="rest-demo-body {{class}}" ng-bind="body"></div>';
+
+    return {
+        require: '^restAction',
+        template: template,
+        restrict: 'E',
+        scope: {
+            class: '@'
+        },
+        link: function(scope, element, attrs, actionCtrl) {
+            element.removeAttr('class');
+            actionCtrl.onDemo('response.body', function(value) {
+                scope.body = value;
+            });
+        }
+    };
+});
 
 restml.directive('restParamInput', ['restSpec', function(restSpec) {
     var template = '';
