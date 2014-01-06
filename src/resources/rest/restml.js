@@ -743,10 +743,6 @@ restml.directive('restAction', ['$http', 'restSpec', function($http, $httpProvid
     template += '<form ng-submit="submit()" ng-transclude></form>';
     template += '</div>';
 
-    //$http.defaults.headers.common = {};
-    //$http.defaults.headers.post = {};
-    //$http.defaults.headers.put = {};
-
     return {
         template: template,
         restrict: "E",
