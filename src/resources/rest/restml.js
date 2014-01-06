@@ -472,7 +472,7 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
 
     var _buildResource = function(node) {
         return {
-            nickname: "watches", // FIXME
+            id: node.attr("id").text(),
             path: node.attr('path').text(),
             actions: _.map(node.children(NS.Rest('action')), _buildAction)
         };
@@ -740,7 +740,7 @@ restml.directive('rest', ['restSpec', function(restSpec) {
 restml.directive('restAction', ['$http', 'restSpec', function($http, $httpProvider, restSpec) {
     var template = '';
     template += '<div class="rest-action">';
-    template += '<form ng-submit="submit()" ng-transclude></form>';
+    template += '<form ng-submit="submit(config)" ng-transclude></form>';
     template += '</div>';
 
     return {
@@ -753,41 +753,91 @@ restml.directive('restAction', ['$http', 'restSpec', function($http, $httpProvid
             resource: '=',
             action: '='
         },
-        link: function($scope, element) {
-            $scope.submit = function() {
-                var method = $scope.action.method,
-                    baseUrl = $scope.api.baseUrl,
-                    path = $scope.resource.path,
-                    url = baseUrl + path;
+        controller: function($scope) {
+            this.configParam = function(name, value) {
+                var p = $scope.config.params[name];
+                if (p) {
+                    p.value = value;
+                }
+            };
 
-                // retreive parameter values
-                var params = {};
-                var _params = element.contents()[0].getElementsByClassName('rest-action-param');
-                _params = _.map(_params, function(elem) { return angular.element(elem); });
-                _.each(_params, function(elem) { params[elem.attr('name')] = elem.val(); });
+            this.apiId = function() { return $scope.api.id; };
+            this.resourceId = function() { return $scope.resource.id; };
+            this.method = function() { return $scope.action.method; };
+
+            $scope.spec = {
+                contentTypes: [
+                    "application/json",
+                    "application/x-www-form-urlencoded"
+                ],
+                accepts: [
+                    "application/json",
+                    "application/xml",
+                    "text/plain",
+                    "*/*"
+                ]
+            }
+
+            $scope.config = {
+                params: (function() {
+                    var ps = $scope.action.params;
+                    ps = _.map(ps, function(p) { return Object.create(p); });
+                    ps = _.map(ps, function(p) { return [p.name, p] });
+                    ps = _.object(ps);
+                    return ps;
+                })(),
+                contentType: null,
+                accepts: null
+            };
+
+            $scope.demo =  {
+                hasRun: false,
+                inProgress: false,
+                url: null,
+                header: null,
+                body: null,
+                response: {
+                    status: null,
+                    header: null,
+                    body: null
+                }
+            };
+
+            $scope.submit = function(config) {
+                if (!config) {
+                    console.log('no config');
+                    return;
+                }
+
                 // TODO validate parameters
+
+                var url = $scope.api.baseUrl + $scope.resource.path; // FIXME render path param templates
+
+                var method = $scope.action.method;
+                var hasBody = method == 'POST' || method == 'PUT'
 
                 var query = $scope.action.params;
                 query = _.filter(query, function(param) { return param.type === 'query'; });
-                query = _.map(query, function(param) { return [param.name, params[param.name]]; });
+                query = _.map(query, function(param) { return [param.name, config.params[param.name].value]; });
                 query = _.object(query);
 
                 var form = $scope.action.params;
                 form = _.filter(form, function(param) { return param.type === 'form' });
-                form = _.map(form, function(param) { return [param.name, params[param.name]] });
+                form = _.map(form, function(param) { return [param.name, params[param.name].value] });
                 form = _.object(form);
 
                 var headers = {}
 
                 // compute acceptable content-types
-                var accepts = [];
-                var acceptElements = element.contents()[0].getElementsByClassName('rest-action-accept');
-                acceptElements = _.map(acceptElements, function(elem) { return angular.element(elem); });
-                accepts = _.map(acceptElements, function(elem) { return elem.val(); });
+//                var accepts = [];
+//                var acceptElements = element.contents()[0].getElementsByClassName('rest-action-accept');
+//                acceptElements = _.map(acceptElements, function(elem) { return angular.element(elem); });
+//                accepts = _.map(acceptElements, function(elem) { return elem.val(); });
+                var accepts = []
                 accepts.push('*/*')
                 headers['Accept'] = accepts.join(',');
 
-                if (method === 'POST' || method === 'PUT') {
+                if (hasBody && false) { // FIXME getElementsByClassName
                     var contentType = _.first(element.contents());
                     contentType = contentType.getElementsByClassName('rest-content-type')
                     contentType = _.map(contentType, function(elem) { return angular.element(elem); });
@@ -802,18 +852,77 @@ restml.directive('restAction', ['$http', 'restSpec', function($http, $httpProvid
                 console.log('header:', headers);
                 console.log('form:', form);
                 console.log('accept:', accepts)
-
-                $http({
-                    method: method,
-                    url: url,
-                    params: query,
-                    headers: headers,
-                    data: form
-                })
             };
         }
     };
 }]);
+
+restml.directive('restParamInput', ['restSpec', function(restSpec) {
+    var template = '';
+    template += '<div class="rest-param">';
+    template += '<input';
+    template += ' id="rest-param-{{api}}-{{method}}-{{resource}}-{{name}}"';
+    template += ' class="rest-param"'
+    template += ' type="text"';
+    template += ' name="{{name}}"';
+    template += ' ng-model="value"';
+    template += ' ng-change="update()"';
+    template += '>';
+    template += '</div>';
+
+    return {
+        require: '^restAction',
+        template: template,
+        restrict: "E",
+        scope: {
+            name: '='
+        },
+        link: function(scope, element, attrs, actionCtrl) {
+            element.addClass('rest-param')
+            scope.api = actionCtrl.apiId();
+            scope.resource = actionCtrl.resourceId();
+            scope.method = actionCtrl.method();
+            scope.update = function() {
+                console.log(scope.name, '=', scope.value);
+                actionCtrl.configParam(scope.name, scope.value);
+            };
+        }
+    }
+}])
+
+restml.directive('restParamLabel', ['restSpec', function(restSpec) {
+    var template = '';
+    template += '<label';
+    template += ' for="rest-param-{{api}}-{{method}}-{{resource}}-{{name}}"';
+    template += '>{{name}}</label>';
+
+    return {
+        require: '^restAction',
+        template: template,
+        restrict: "E",
+        scope: {
+            name: '=for'
+        },
+        link: function(scope, element, attrs, actionCtrl) {
+            scope.api = actionCtrl.apiId();
+            scope.resource = actionCtrl.resourceId();
+            scope.method = actionCtrl.method();
+        }
+    }
+}])
+
+// idk wtf is going on here.
+restml.directive('restParamName', ['restSpec', function(restSpec) {
+    var template = 'param.name';
+
+    return {
+        require: '^restAction',
+        template: template,
+        restrict: "E",
+        scope: { name: '=' },
+        link: function(scope, element, attrs, actionCtrl) { }
+    }
+}])
 
 restml.directive('restSelect', ['restSpec', function(restSpec) {
     var template = '';

@@ -39,24 +39,21 @@
                                         </span>
                                     </div>
                                 </div>
-                                <table class="table table-hover parameter-specification">
-                                    <tr ng-repeat="param in action.params" class="form-group">
-                                        <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3" ng-class="{'text-muted': !param.required}">
-                                            <label for="resource_{{resource.nickname}}-{{action.method}}-param_{{param.name}}" class="control-label">
-                                                {{param.name}}: {{param.model.baseType}}
-                                            </label>
+                                <table class="table table-hover">
+                                    <tr ng-repeat="param in action.params"
+                                        class="form-group param-spec" ng-class="{'text-muted': !param.required}">
+                                        <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                                            <rest-param-label for="param.name" class="control-label"></rest-param-label>
+                                            : <span class="text-muted">{{param.model.baseType}}</span>
                                         </td>
-                                        <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" ng-class="{'text-muted': !param.required}">
-                                            {{param.type}}
+                                        <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                            <span class="param-type">{{param.type}}</span>
                                         </td>
-                                        <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" ng-class="{'text-muted': !param.required}">
-                                            <span ng-hide="param.required">
-                                                (optional)
-                                            </span>
+                                        <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                            <span ng-hide="param.required">(optional)</span>
                                         </td>
                                         <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-                                            <!-- TODO use a directive to add the rest-action-param class -->
-                                            <input name="{{param.name}}" type="text" class="rest-action-param pull-right" id="resource_{{resource.nickname}}-{{action.method}}-param_{{param.name}}">
+                                            <rest-param-input name="param.name" class="pull-right"></rest-param-input>
                                         </td>
                                     </tr>
                                     <tr>
