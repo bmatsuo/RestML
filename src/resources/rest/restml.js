@@ -818,6 +818,7 @@ restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeou
             $scope.demo =  {
                 hasRun: false,
                 inProgress: false,
+                method: null,
                 url: null,
                 header: null,
                 body: null,
@@ -938,9 +939,29 @@ restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeou
     };
 }]);
 
+restml.directive('restDemoMethod', function() {
+    var template = '';
+    template += '<span class="rest-demo-method {{class}}" ng-bind="method"></span>';
+
+    return {
+        require: '^restAction',
+        template: template,
+        restrict: 'E',
+        scope: {
+            class: '@'
+        },
+        link: function(scope, element, attrs, actionCtrl) {
+            element.removeAttr('class');
+            actionCtrl.onDemo('method', function(value) {
+                scope.method = value;
+            });
+        }
+    };
+});
+
 restml.directive('restDemoUrl', function() {
     var template = '';
-    template += '<div class="rest-demo-uri {{class}}" ng-bind="url"></div>';
+    template += '<span class="rest-demo-url {{class}}" ng-bind="url"></span>';
 
     return {
         require: '^restAction',
@@ -991,7 +1012,7 @@ restml.directive('restDemoHeader', function() {
 
 restml.directive('restDemoBody', function() {
     var template = '';
-    template += '<div class="rest-demo-body {{class}}" ng-bind="body"></div>';
+    template += '<span class="rest-demo-body {{class}}" ng-bind="body"></span>';
 
     return {
         require: '^restAction',

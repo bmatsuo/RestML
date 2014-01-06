@@ -2,6 +2,10 @@
     width: 100%;
 }
 
+.rest-demo-header {
+    margin-bottom: 0px;
+}
+
 .rest-submit.btn span {
     margin-left: 0.2em;
     margin-right: 0.2em;

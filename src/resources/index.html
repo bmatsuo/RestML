@@ -126,38 +126,22 @@
                                                 <span class="glyphicon glyphicon-transfer"></span>
                                             </rest-submit>
                                         </td>
-
                                     </tr>
                                 </table>
 
                                 <div class="panel-body response" ng-hide="false"><!-- FIXME -->
-                                    Request URI
+                                    <strong>Request</strong>
                                     <div class="well well-default">
+                                        <rest-demo-method></rest-demo-method>
                                         <rest-demo-url></rest-demo-url>
-                                    </div>
-
-                                    Request Header
-                                    <div class="well well-default">
                                         <rest-demo-header class="list-unstyled"></rest-demo-header>
-                                    </div>
-
-                                    Request Body
-                                    <div class="well well-default">
                                         <rest-demo-body></rest-demo-body>
                                     </div>
 
-                                    Response Status
+                                    <strong>Response</strong>
                                     <div class="well well-default">
                                         <rest-demo-response-status></rest-demo-response-status>
-                                    </div>
-
-                                    Response Header
-                                    <div class="well well-default">
                                         <rest-demo-response-header class="list-unstyled"></rest-demo-response-header>
-                                    </div>
-
-                                    Response Body
-                                    <div class="well well-default">
                                         <rest-demo-response-body></rest-demo-response-body>
                                     </div>
                                 </div>
