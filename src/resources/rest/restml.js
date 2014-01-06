@@ -760,23 +760,30 @@ restml.directive('restAction', ['$http', 'restSpec', function($http, $httpProvid
                     p.value = value;
                 }
             };
+            this.configContentType = function(type) {
+                $scope.config.contentType = type;
+            };
+            this.configAccept = function(type) {
+                $scope.config.accept = type;
+            };
 
             this.apiId = function() { return $scope.api.id; };
             this.resourceId = function() { return $scope.resource.id; };
             this.method = function() { return $scope.action.method; };
-
-            $scope.spec = {
-                contentTypes: [
+            this.contentTypes = function() {
+                return [
                     "application/json",
                     "application/x-www-form-urlencoded"
-                ],
-                accepts: [
+                ];
+            };
+            this.accepts = function() {
+                return [
                     "application/json",
                     "application/xml",
                     "text/plain",
                     "*/*"
-                ]
-            }
+                ];
+            };
 
             $scope.config = {
                 params: (function() {
@@ -787,7 +794,7 @@ restml.directive('restAction', ['$http', 'restSpec', function($http, $httpProvid
                     return ps;
                 })(),
                 contentType: null,
-                accepts: null
+                accept: null
             };
 
             $scope.demo =  {
@@ -808,6 +815,7 @@ restml.directive('restAction', ['$http', 'restSpec', function($http, $httpProvid
                     console.log('no config');
                     return;
                 }
+                console.log('config:', config);
 
                 // TODO validate parameters
 
@@ -823,27 +831,22 @@ restml.directive('restAction', ['$http', 'restSpec', function($http, $httpProvid
 
                 var form = $scope.action.params;
                 form = _.filter(form, function(param) { return param.type === 'form' });
-                form = _.map(form, function(param) { return [param.name, params[param.name].value] });
+                form = _.map(form, function(param) { return [param.name, config.params[param.name].value] });
                 form = _.object(form);
 
                 var headers = {}
 
-                // compute acceptable content-types
-//                var accepts = [];
-//                var acceptElements = element.contents()[0].getElementsByClassName('rest-action-accept');
-//                acceptElements = _.map(acceptElements, function(elem) { return angular.element(elem); });
-//                accepts = _.map(acceptElements, function(elem) { return elem.val(); });
                 var accepts = []
+                if (config.accept) {
+                    accepts.push(config.accept);
+                }
                 accepts.push('*/*')
                 headers['Accept'] = accepts.join(',');
 
-                if (hasBody && false) { // FIXME getElementsByClassName
-                    var contentType = _.first(element.contents());
-                    contentType = contentType.getElementsByClassName('rest-content-type')
-                    contentType = _.map(contentType, function(elem) { return angular.element(elem); });
-                    contentType = _.map(contentType, function(elem) { return elem.val(); });
-                    contentType = _.first(contentType);
-                    headers['Content-Type'] = contentType + '; charset=utf-8';
+                if (hasBody) {
+                    if (config.contentType) {
+                        headers['Content-Type'] = config.contentType + '; charset=utf-8';
+                    }
                 }
 
                 console.log('method:', method);
@@ -921,6 +924,115 @@ restml.directive('restParamName', ['restSpec', function(restSpec) {
         restrict: "E",
         scope: { name: '=' },
         link: function(scope, element, attrs, actionCtrl) { }
+    }
+}])
+
+restml.directive('restContentTypeSelect', ['restSpec', function() {
+    var template = '';
+    template += '<select';
+    template += ' id="rest-content-type-{{api}}-{{method}}-{{resource}}"';
+    template += ' class="rest-content-type {{class}}"';
+    template += ' name="rest-content-type"';
+    template += ' ng-model="input"';
+    template += ' ng-change="update()"';
+    template += '>';
+    template += '<option ng-repeat="type in contentTypes" value="{{type}}">{{type}}</option>';
+    template += '</select>';
+
+    return {
+        require: '^restAction',
+        template: template,
+        restrict: "E",
+        scope: {
+            name: '=',
+            class: '@'
+        },
+        link: function(scope, element, attrs, actionCtrl) {
+            element.removeAttr('class');
+            scope.api = actionCtrl.apiId();
+            scope.resource = actionCtrl.resourceId();
+            scope.method = actionCtrl.method();
+            scope.contentTypes = actionCtrl.contentTypes();
+            scope.input = _.first(scope.contentTypes);
+            scope.update = function() { actionCtrl.configContentType(scope.input); }
+            if (scope.input) scope.update();
+        }
+    }
+}]);
+
+restml.directive('restContentTypeLabel', ['restSpec', function(restSpec) {
+    var template = '';
+    template += '<label';
+    template += ' for="rest-content-type-{{api}}-{{method}}-{{resource}}"';
+    template += ' ng-transclude';
+    template += '></label>';
+
+    return {
+        require: '^restAction',
+        template: template,
+        transclude: true,
+        restrict: "E",
+        scope: { },
+        link: function(scope, element, attrs, actionCtrl) {
+            scope.api = actionCtrl.apiId();
+            scope.resource = actionCtrl.resourceId();
+            scope.method = actionCtrl.method();
+        }
+    }
+}])
+
+restml.directive('restAcceptSelect', ['restSpec', function() {
+    var template = '';
+    template += '<select';
+    template += ' id="rest-accept-{{api}}-{{method}}-{{resource}}"';
+    template += ' class="rest-accept {{class}}"';
+    template += ' name="rest-accept"';
+    template += ' ng-class="classes"'
+    template += ' ng-model="input"';
+    template += ' ng-change="update()"';
+    template += '>';
+    template += '<option ng-repeat="type in accepts" value="{{type}}">{{type}}</option>';
+    template += '</select>';
+
+    return {
+        require: '^restAction',
+        template: template,
+        restrict: "E",
+        scope: {
+            name: '=',
+            class: '@'
+        },
+        link: function(scope, element, attrs, actionCtrl) {
+            element.removeAttr('class');
+            scope.api = actionCtrl.apiId();
+            scope.resource = actionCtrl.resourceId();
+            scope.method = actionCtrl.method();
+            scope.accepts = actionCtrl.accepts();
+            scope.input = _.first(scope.accepts);
+            scope.update = function() { actionCtrl.configAccept(scope.input); }
+            if (scope.input) scope.update();
+        }
+    }
+}]);
+
+restml.directive('restAcceptLabel', ['restSpec', function(restSpec) {
+    var template = '';
+    template += '<label';
+    template += ' for="rest-accept-{{api}}-{{method}}-{{resource}}"';
+    template += ' ng-transclude';
+    template += '></label>';
+
+    return {
+        require: '^restAction',
+        template: template,
+        transclude: true,
+        restrict: "E",
+        scope: {},
+        link: function(scope, element, attrs, actionCtrl) {
+            scope.api = actionCtrl.apiId();
+            scope.resource = actionCtrl.resourceId();
+            scope.method = actionCtrl.method();
+        }
     }
 }])
 

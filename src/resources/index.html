@@ -71,7 +71,7 @@
                                                             <li ng-repeat="model in response.models" class="model">
                                                                 <div>
                                                                     <span>
-                                                                        <a>
+                                                                        <a><!-- TODO link to schima -->
                                                                             <span tooltip-placement="right" tooltip="{{api.models[model.ref].description}}">
                                                                                 <strong>
                                                                                     {{api.models[model.ref].title}}
@@ -91,29 +91,27 @@
                                     </tr>
                                     <tr ng-hide="action.method === 'GET' || action.method === 'DELETE'">
                                         <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
-                                            <label for="content-type" class="control-label">Content-Type</label>
+                                            <rest-content-type-label class="control-label">
+                                                Content-Type
+                                            </rest-content-type-label>
                                         </td>
                                         <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
                                             <div class="content-type-specification">
                                                 <!-- TODO use a directive to add the rest-action-accept class -->
-                                                <select id="content-type" class="form-control rest-content-type" name="rest-content-type">
-                                                    <option value="application/json">application/json</option>
-                                                    <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
-                                                </select>
+                                                <rest-content-type-select class="form-control"></rest-content-type-select>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
-                                            <label for="accept" class="control-label">Accept</label>
+                                            <rest-accept-label class="control-label">
+                                                Accept
+                                            </rest-accept-label>
                                         </td>
                                         <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
                                             <div class="accept-specification">
                                                 <!-- TODO use a directive to add the rest-action-accept class -->
-                                                <select id="accept" class="form-control rest-action-accept" name="rest-accept-type">
-                                                    <option value="application/json">application/json</option>
-                                                    <option value="text/xml">text/xml</option>
-                                                </select>
+                                                <rest-accept-select class="form-control"></rest-accept-select>
                                             </div>
                                         </td>
                                     </tr>
