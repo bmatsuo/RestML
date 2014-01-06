@@ -743,6 +743,17 @@ restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeou
     template += '<form ng-submit="submit(config)" ng-transclude></form>';
     template += '</div>';
 
+    var _encode = {
+        "application/x-www-form-urlencoded": function(data) {
+            return _.map(data, function(val, name) {
+                return encodeURIComponent(name) + '=' + encodeURIComponent(val);
+            }).join('&');
+        },
+        "application/json": function(data) {
+            return JSON.stringify(data);
+        }
+    };
+
     return {
         template: template,
         restrict: "E",
@@ -849,11 +860,6 @@ restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeou
                 query = _.map(query, function(param) { return [param.name, config.params[param.name].value]; });
                 query = _.object(query);
 
-                var form = $scope.action.params;
-                form = _.filter(form, function(param) { return param.type === 'form' });
-                form = _.map(form, function(param) { return [param.name, config.params[param.name].value] });
-                form = _.object(form);
-
                 var header = [];
 
                 var accepts = []
@@ -866,13 +872,27 @@ restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeou
                     value: accepts.join(',')
                 });
 
+
+                var body;
                 if (hasBody) {
-                    if (config.contentType) {
-                        header.push({
-                            name: 'Content-Type',
-                            value: config.contentType + '; charset=utf-8'
-                        });
+                    body =  $scope.action.params;
+                    body = _.filter(body, function(param) { return param.type === 'form' });
+                    body = _.map(body, function(param) { return [param.name, config.params[param.name].value] });
+                    body = _.object(body);
+                    console.log(body);
+
+                    var _type = config.contentType;
+                    if (!_type) {
+                        _type = 'application/x-www-form-urlencoded';
                     }
+                    header.push({
+                        name: 'Content-Type',
+                        value: config.contentType + '; charset=utf-8'
+                    });
+                    $scope.demo.body = _encode[_type](body);
+                } else {
+                    console.log('no body for request');
+                    delete $scope.demo.body;
                 }
 
                 $scope.demo.header = header;
@@ -880,14 +900,11 @@ restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeou
 
                 var headers = _.object(_.map(header, function(h) { return [h.name, h.value]; }))
 
-                $scope.demo.body = 'FIXME';
-                _demoCallback('body');
-
                 console.log('method:', method);
                 console.log('url:', url);
                 console.log('query:', query);
                 console.log('header:', headers);
-                console.log('form:', form);
+                console.log('body:', $scope.demo.body);
 
                 $scope.demo.response = {};
                 $scope.demo.inProgress = true;
