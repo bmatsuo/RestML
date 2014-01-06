@@ -797,7 +797,7 @@ restml.directive('restAction', ['$http', 'restSpec', function($http, $httpProvid
                     contentType = _.map(contentType, function(elem) { return angular.element(elem); });
                     contentType = _.map(contentType, function(elem) { return elem.val(); });
                     contentType = _.first(contentType);
-                    headers['Content-Type'] = contentType + '; charset="utf-8"';
+                    headers['Content-Type'] = contentType + '; charset=utf-8';
                 }
 
                 console.log('method:', method);

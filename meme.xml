@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rest:api id="meme"
-          baseUrl="http://meme.bmats.co"
+          baseUrl="http://localhost:4567"
           version="2.29.5-E"
           xmlns:rest="http://x.bmats.co/rest/2013.01"
           xmlns:meta="http://x.bmats.co/rest-meta/2013.01"

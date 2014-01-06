@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rest:api id="fail"
-          baseUrl="http://fail.bmats.co"
+          baseUrl="http://localhost:4567"
           version="5.14.3-9"
           xmlns:rest="http://x.bmats.co/rest/2013.01"
           xmlns:meta="http://x.bmats.co/rest-meta/2013.01"
