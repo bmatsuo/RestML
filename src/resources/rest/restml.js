@@ -760,11 +760,16 @@ restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeou
         replace: true,
         transclude: true,
         scope: {
+            headerCase: '@',
             api: '=',
             resource: '=',
             action: '='
         },
         controller: function($scope) {
+            var _headerLower = function() {
+                return $scope.headerCase === 'lower'
+            };
+
             this.configParam = function(name, value) {
                 var p = $scope.config.params[name];
                 if (p) {
@@ -796,20 +801,8 @@ restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeou
                 ];
             };
 
-            _onDemoCallbacks = {};
             this.onDemo = function(key, callback) {
                 $scope.$watch('demo.'+key, callback);
-                //var cbs = _onDemoCallbacks[key];
-                //if (!cbs) cbs = [];
-                //cbs.push(callback);
-                //_onDemoCallbacks[key] = cbs;
-            };
-            var _demoCallback = function(key) {
-                var cbs = _onDemoCallbacks[key];
-                _.each(cbs, function(cb) {
-                    var val = $scope.demo[key];
-                    $timeout(function() { cb(val); }, 0);
-                });
             };
 
             $scope.config = {
@@ -837,6 +830,34 @@ restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeou
                 }
             };
 
+            var _demoFinish = function(data, status, headers) {
+                $scope.demo.hasRun = true;
+                $scope.demo.inProgress = false;
+
+                $scope.demo.response.status = status.toString() + ' ???';
+                $scope.demo.response.header = _.map(headers(), function(value, name) {
+                    if (!_headerLower()) {
+                        name = name.replace(/(\w+)/g, function(s) {
+                            return s.charAt(0).toUpperCase() + s.substr(1);
+                        });
+                    }
+                    return {
+                        name: name,
+                        value: value
+                    }
+                });
+                $scope.demo.response.body = data;
+            };
+
+            var _demoStart = function(config) {
+                $scope.demo.response = {};
+                $scope.demo.inProgress = true;
+
+                $http(config).
+                    success(_demoFinish).
+                    error(_demoFinish);
+            };
+
             $scope.submit = function(config) {
                 if (!config) {
                     console.log('no config');
@@ -850,9 +871,8 @@ restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeou
                 $scope.demo.url = url;
 
                 var method = $scope.action.method;
-                $scope.demo.method = method;
-                _demoCallback('method');
                 var hasBody = method == 'POST' || method == 'PUT'
+                $scope.demo.method = method;
 
                 var query = $scope.action.params;
                 query = _.filter(query, function(param) { return param.type === 'query'; });
@@ -897,9 +917,10 @@ restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeou
                     delete $scope.demo.body;
                 }
 
+                if (_headerLower()) {
+                    _.each(header, function(h) { h.name = h.name.toLowerCase(); })
+                }
                 $scope.demo.header = header;
-                _demoCallback('header');
-
                 var headers = _.object(_.map(header, function(h) { return [h.name, h.value]; }))
 
                 console.log('method:', method);
@@ -908,23 +929,13 @@ restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeou
                 console.log('header:', headers);
                 console.log('body:', $scope.demo.body);
 
-                $scope.demo.response = {};
-                $scope.demo.inProgress = true;
-
-                $timeout(function() {
-                    $scope.demo.hasRun = true;
-                    $scope.demo.inProgress = false;
-
-                    $scope.demo.response.status = '200 OK';
-                    $scope.demo.response.header = [
-                        {
-                            name: 'Content-Type',
-                            value: 'application/fixme'
-                        }
-                    ];
-                    $scope.demo.response.body = 'bobobobob';
-                    _demoCallback('response');
-                }, 1000)
+                _demoStart({
+                    method: method,
+                    url: url,
+                    params: query,
+                    headers: headers,
+                    body: $scope.demo.body
+                });
             };
         }
     };

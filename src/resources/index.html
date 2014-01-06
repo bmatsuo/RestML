@@ -24,6 +24,7 @@
 
                     <div ng-repeat="resource in group.resources">
                         <rest-action ng-repeat="action in resource.actions"
+                                     header-case="upper"
                                      api="api" resource="resource" action="action"><!-- attrs used for making requests -->
                             <div class="panel panel-default">
                                 <div class="panel-heading action-header">
