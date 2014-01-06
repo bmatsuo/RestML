@@ -6,7 +6,6 @@ restApp.controller('restController', ['$scope', 'restSpec', function($scope, res
     };
 
     $scope.serviceLoaded = function(service) {
-        console.log('service loaded:', service);
         $scope.title = service.title;
         $scope.subtitle = service.subtitle;
         $scope.description = service.description;

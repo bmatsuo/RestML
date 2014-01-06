@@ -516,7 +516,6 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         api.version = node.attr('version').text();
         api.groups = _.map(node.children(NS.Rest('group')), _buildGroup);
         api.models = _toObject(_.map(node.children(NS.Rest('model')), _buildModel));
-        console.log('apis "'+api.id+'"', api.models);
 
         return api;
     }
@@ -552,8 +551,9 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
                     });
             }
         } else {
-            console.log('building api specification "'+id+'"')
-            q.resolve(_buildApi_really(node))
+            var api = _buildApi_really(node);
+            q.resolve(api)
+            console.log('API "'+api.id+'"', api.models);
         }
         return q.promise;
     };
@@ -606,7 +606,6 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
 
     var _buildService = function(node) {
         node = X.Node(node);
-        console.log('building api specifications');
         var apiPromises = _.map(node.children(NS.Rest('api')), _buildApi);
         return _pmap($q.all(apiPromises), function(apis) {
             var service = {};
@@ -630,7 +629,6 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
             throw 'invalid namespace: ' + ns;
         }
 
-        console.log('building service specification');
         return _pmap(_buildService(xml.domTree), function(service) {
             return {
                 xml: xml,
@@ -901,7 +899,6 @@ restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeou
                     body = _.filter(body, function(param) { return param.type === 'form' });
                     body = _.map(body, function(param) { return [param.name, config.params[param.name].value] });
                     body = _.object(body);
-                    console.log(body);
 
                     var _type = config.contentType;
                     if (!_type) {
@@ -1109,7 +1106,6 @@ restml.directive('restParamInput', ['restSpec', function(restSpec) {
             scope.resource = actionCtrl.resourceId();
             scope.method = actionCtrl.method();
             scope.update = function() {
-                console.log(scope.name, '=', scope.value);
                 actionCtrl.configParam(scope.name, scope.value);
             };
         }
