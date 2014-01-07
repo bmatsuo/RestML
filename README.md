@@ -13,9 +13,7 @@ inspection.
 
 ##Key differences from Swagger
 
-- XML based with an xml schema for proper validation. A stricter, well defined
-specification allows for better tooling (e.g. command line clients, code
-generation, etc).
+- XML based with an xml schema for proper validation and tooling.
 - AngularJS based UI. Completely customizable out of the box (style and
 content).
 - A higher level of abstraction and a concentration on distributed
