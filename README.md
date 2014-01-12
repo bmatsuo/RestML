@@ -3,6 +3,14 @@ An AngularJS directive DSL for laying out service documentation.
 
 The goal of RestML is to support authenticated JSON and XML APIs.
 
+##Demo
+
+    python -m SimpleHTTPServer
+
+in another terminal
+
+    open http://localhost:8000/demo/
+
 ##Features
 
 - Specification of GET, PUT, POST, and DELETE actions.
