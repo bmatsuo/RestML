@@ -8,6 +8,6 @@
     </meta:description>
     <meta:license type="Apache 2.0" href="http://www.apache.org/licenses/LICENSE-2.0.html"/>
     <meta:terms type="Terms of Service" href="http://bmats.co/terms"/>
-    <rest:api id="meme" href="/meme.xml"/>
-    <rest:api id="fail" href="/fail.xml"/>
+	<rest:api id="meme" href="/demo/meme.xml"/>
+	<rest:api id="fail" href="/demo/fail.xml"/>
 </listing>
