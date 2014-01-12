@@ -1,24 +1,26 @@
-##RestML: Stabilize your API
+An XML vocabulary for specifying RESTful HTTP services.
+An AngularJS directive DSL for laying out service documentation.
 
-RestML is an XML vocabulary for specifying RESTful HTTP services.
-The goal of RestML is support authenticated of JSON and XML APIs.
+The goal of RestML is to support authenticated JSON and XML APIs.
 
 ##Features
 
 - Specification of GET, PUT, POST, and DELETE actions.
 - Specification of path, query, and form parameters
-- An API playground with a variable Accept header type request/response
-inspection.
-- A __completely__ customizable UI.
+- API 'playground' with a variable Accept header type
+request/response inspection.
+- A completely customizable UI.
 
 ##Key differences from Swagger
 
-- XML based with an xml schema for proper validation and tooling.
-- AngularJS based UI. Completely customizable out of the box (style and
-content).
-- A higher level of abstraction and a concentration on distributed
-specification lets RestML serve your entire company's API documentation
-in a way that's modular and manageable with a consistent interface.
+XML based with an schema for validation and tooling. XML Schema is a W3C
+standard with (possibly) man years of effort dedicated to tooling. Further,
+XML Schema allows for documentation to be tied directly to the schema
+version, making the integration experience smooth.
+
+A simple DSL using AngularJS defines the UI. UI deployment is simple
+(host a single html file). And (if you want it to be), everything is
+completely customizable out of the box.
 
 ##Plans
 
@@ -28,10 +30,18 @@ in a way that's modular and manageable with a consistent interface.
 
 ##Model specification plans
 
-- ???
+- This is hard problem. Not sure how to solve it.
 
 ##Planned parameter types
 
 - file
-- json
-- xml
+- `application/json`
+- `application/xml`
+
+##Potential plans for fancy response type handling
+
+- `application/json`
+- `application/xml`
+- `text/csv`
+- `image/*`
+- `video/*`
