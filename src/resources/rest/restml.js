@@ -668,6 +668,83 @@ restml.directive('restApi', ['restSpec', function(restSpec) {
     };
 }]);
 
+restml.directive('restDocs1', [function() {
+    return {
+        // TODO templatize this template!
+        template: '<div class="rest-docs"><h1>{{title}} <small>{{subtitle}}</small></h1><p>{{description}}</p></div>',
+        restrict: "E",
+        replace: true,
+        transclude: true,
+        scope: {
+            obj: '='
+        },
+        link: function(scope, element) {
+            var _setObj = function(obj) {
+                if (obj) {
+                    scope.title = obj.title;
+                    scope.subtitle = obj.subtitle;
+                    scope.description = obj.description;
+                }
+            };
+
+            scope.$watch('obj', function(value) {
+                _setObj(value);
+            });
+        }
+    };
+}]);
+
+restml.directive('restDocs2', [function() {
+    return {
+        // TODO templatize this template!
+        template: '<div class="rest-docs"><h2>{{title}} <small>{{subtitle}}</small></h2><p>{{description}}</p></div>',
+        restrict: "E",
+        replace: true,
+        transclude: true,
+        scope: {
+            obj: '='
+        },
+        link: function(scope, element) {
+            var _setObj = function(obj) {
+                if (obj) {
+                    scope.title = obj.title;
+                    scope.subtitle = obj.subtitle;
+                    scope.description = obj.description;
+                }
+            };
+
+            scope.$watch('obj', function(value) {
+                _setObj(value);
+            });
+        }
+    };
+}]);
+
+restml.directive('restDocs3', [function() {
+    return {
+        // TODO templatize this template!
+        template: '<div class="rest-docs"><h3>{{title}} <small>{{subtitle}}</small></h3><p>{{description}}</p></div>',
+        restrict: "E",
+        replace: true,
+        transclude: true,
+        scope: {
+            obj: '='
+        },
+        link: function(scope, element) {
+            var _setObj = function(obj) {
+                if (obj) {
+                    scope.title = obj.title;
+                    scope.subtitle = obj.subtitle;
+                    scope.description = obj.description;
+                }
+            };
+
+            scope.$watch('obj', function(value) {
+                _setObj(value);
+            });
+        }
+    };
+}]);
 restml.directive('restSubmit', ['restSpec', function(restSpec) {
     return {
         template: '<button type="submit" class="rest-submit" ng-transclude></button>',

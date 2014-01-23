@@ -11,16 +11,13 @@
         <rest-select src="'/demo/service.xml'" on-select="selected(serviceUrl)"></rest-select>
 
         <rest src="src" on-load="serviceLoaded(service)" ng-cloak>
-            <h1>{{title}} <small>{{subtitle}}</small></h1>
-            <p>{{description}}</p>
+            <rest-docs1 obj="service"></rest-docs1>
 
-            <rest-api ng-repeat="api in apis">
-                <h2>{{api.title}} <small>{{api.subtitle}}</small></h2>
-                <p>{{api.description}}</p>
+            <rest-api ng-repeat="api in service.apis">
+                <rest-docs2 obj="api"></rest-docs2>
 
                 <div ng-repeat="group in api.groups">
-                    <h3>{{group.title}} <small>{{group.subtitle}}</small></h3>
-                    <p>{{group.description}}</p>
+                    <rest-docs3 obj="group"></rest-docs3>
 
                     <div ng-repeat="resource in group.resources">
                         <rest-action ng-repeat="action in resource.actions"
