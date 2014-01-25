@@ -11,6 +11,12 @@ in another terminal
 
     open http://localhost:8000/demo/
 
+##Development
+
+For your own sanity, use
+[Eclipse (for Java EE developers)](http://www.eclipse.org/downloads/)
+to exit xml files by hand.
+
 ##Features
 
 - Specification of GET, PUT, POST, and DELETE actions.
