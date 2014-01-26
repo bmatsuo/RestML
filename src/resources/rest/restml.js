@@ -92,6 +92,7 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         return val;
     }
 
+    // TODO this is NOT done. it probably needs to be reworked
     var Model = function(constraints) {
         var _baseType, _enum, _enumValues = [];
         if (constraints.length > 1) {
