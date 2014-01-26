@@ -84,12 +84,12 @@ var X = function() {
                         var local = filter.local();
 
                         children = _filterNode(children, function(child) {
-                            return child.namespaceURI.toString() === ns && child.localName === local;
+                            return child.getNamespaceURI().toString() === ns && child.localName === local;
                         });
                     } else if (typeof filter.uri === 'function') {
                         var ns = filter.uri();
                         children = _filterNode(children, function(child) {
-                            return child.namespaceURI.toString() === ns;
+                            return child.getNamespaceURI().toString() === ns;
                         });
                     }
                 }
@@ -109,9 +109,9 @@ var X = function() {
 
         var _ns = function() {
             if (node === null) return null;
-            var ns = node.namespaceURI.toString();
-            if (ns) return null;
-            return NS(ns);
+            var ns = node.getNamespaceURI();
+            if (!ns) return null;
+            return _NS(ns.toString());
         };
 
         var _local = function() {
@@ -159,8 +159,16 @@ var X = function() {
         return self;
     };
 
+    var _load = function(rawxml) {
+        var _parser = new DOMImplementation(),
+            _dom = _parser.loadXML(rawxml),
+            _domTree = _dom.getDocumentElement();
+        return new _Node(_domTree);
+    };
+
     return {
         Node: _Node,
-        NS: _NS
+        NS: _NS,
+        load: _load
     };
 }()

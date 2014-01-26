@@ -8,31 +8,20 @@ This is __free__ software y'all.
 
 var restml = angular.module('restml', []);
 
-restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $http, $q) {
+restml.factory('restSpec', ['$rootScope', '$http', '$q', '$timeout', function($rootScope, $http, $q, $timeout) {
     var _dom,  // the specification DOM
         _tree; // the specification DOM tree
 
     var _loadXML = function(data) {
         var q = $q.defer();
 
-        setTimeout(function() {
-            $rootScope.$apply(function() {
-                try {
-                    var _parser = new DOMImplementation(),
-                        _dom = _parser.loadXML(data),
-                        _domTree = _dom.getDocumentElement();
-
-                    q.resolve({
-                        dom: _dom,
-                        domTree: _domTree,
-                    });
-                }
-                catch(e) {
-                    console.error('fuck', e);
-                    q.reject(e);
-                }
-            });
-        }, 0);
+        $timeout(function() {
+            try { q.resolve(X.load(data)); }
+            catch(e) {
+                console.error('fuck', e);
+                q.reject(e);
+            }
+        })
 
         return q.promise;
     };
@@ -375,7 +364,7 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
                 $http.get(href).
                     success(function(data, status) {
                         _pflatmap(_loadXML(data), function(xml) {
-                            return _pmap(_buildApi(X.Node(xml.domTree)), function(api) { // FIXME i'm losing information here.
+                            return _pmap(_buildApi(xml), function(api) { // FIXME i'm losing information here.
                                 if (api.id !== id) {
                                     var msg = 'rest:api at '+href;
                                     msg += ' has id "'+api.id+'"';
@@ -418,12 +407,10 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
         return function() {
             var args = arguments;
             var q = $q.defer();
-            setTimeout(function(){
-                $rootScope.$apply(function() {
-                    try { q.resolve(fn.apply(this, args)); }
-                    catch(e) { q.reject(e); }
-                });
-            }, 0);
+            $timeout(function(){
+                try { q.resolve(fn.apply(this, args)); }
+                catch(e) { console.log('crap:', e); q.reject(e); }
+            });
             return q.promise;
         }
     };
@@ -447,31 +434,29 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
     };
 
     var _buildService = function(node) {
-        node = X.Node(node);
-        var apiPromises = _.map(node.children(NS.Rest('api')), _buildApi);
-        return _pmap($q.all(apiPromises), function(apis) {
-            var service = {};
+        var service = {};
+        service.title = node.child(NS.Meta('title')).child().text();
+        service.subtitle = node.child(NS.Meta('subtitle')).child().text();
+        service.description = node.child(NS.Meta('description')).child().text();
+        service.licenses = _.map(node.children(NS.Meta('license')), _buildLicense);
+        service.terms = _.map(node.children(NS.Meta('terms')), _buildTerms);
 
+        var apis = node.children(NS.Rest('api'));
+        apis = _.map(apis, _buildApi);
+        apis = $q.all(apis)
+        return _pmap(apis, function(apis) {
             service.apis = apis;
-
-            service.title = node.child(NS.Meta('title')).child().text();
-            service.subtitle = node.child(NS.Meta('subtitle')).child().text();
-            service.description = node.child(NS.Meta('description')).child().text();
-
-            service.licenses = _.map(node.children(NS.Meta('license')), _buildLicense);
-            service.terms = _.map(node.children(NS.Meta('terms')), _buildTerms);
             return service;
-        })
+        });
     };
 
     var _buildSpec = function(xml) {
-        var root = xml.domTree;
-
-        if (root.getNamespaceURI().toString() !== NS_SERVICE) {
-            throw 'invalid namespace: ' + ns;
+        var ns = xml.ns().uri();
+        if (ns !== NS_SERVICE) {
+            throw 'invalid namespace: ' + ns + ' (!= '+ NS_SERVICE +')';
         }
 
-        return _pmap(_buildService(xml.domTree), function(service) {
+        return _pmap(_buildService(xml), function(service) {
             return {
                 xml: xml,
                 service: service
