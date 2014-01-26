@@ -84,50 +84,6 @@ restml.factory('restSpec', ['$rootScope', '$http', '$p', '$q', function($rootSco
             Rest: X.NS(NS_REST)
         };
 
-    var _nodeListToArray = function(list) {
-        var a = [];
-        for (var i = 0; i < list.length; i++) {
-            a.push(list.item(i));
-        }
-        return a
-    };
-
-    var _mapNode = function(list, f) {
-        return _.map(_nodeListToArray(list), f)
-    };
-
-    var _filterNode = function(nodeList, predicate) {
-        var filtered = new DOMNodeList(nodeList.ownerDocument, nodeList.parentNode);
-        for (var i = 0; i < nodeList.length; i++) {
-            var node = nodeList.item(i);
-            if (predicate(node)) {
-                filtered._appendChild(node);
-            }
-        }
-        return filtered
-    };
-
-    var _getChildrenByTagNameNS = function(node, ns, local) {
-        return _filterNode(node.childNodes, function(child) {
-            return child.getNamespaceURI().toString() === ns.toString() &&
-                child.localName == local;
-        })
-    };
-
-    var _getMeta = function(node, key) {
-        var child = _getChildrenByTagNameNS(node, NS_META, key).item(0),
-            text = child ? child.childNodes.item(0) : null,
-            val = text ? text.getNodeValue().toString() : undefined;
-        return val;
-    };
-
-    var _getRest = function(node, key) {
-        var child = _getChildrenByTagNameNS(node, NS_REST, key).item(0),
-            text = child ? child.childNodes.item(0) : null,
-            val = text ? text.getNodeValue().toString() : undefined;
-        return val;
-    }
-
     // TODO this is NOT done. it probably needs to be reworked
     var Model = function(constraints) {
         var _baseType, _enum, _enumValues = [];
