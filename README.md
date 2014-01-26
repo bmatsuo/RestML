@@ -11,6 +11,10 @@ in another terminal
 
     open http://localhost:8000/demo/
 
+you can switch to the dogecoin example service by entering
+/demo/dogecoin/service.xml into the input at the top of the
+page.
+
 ##Development
 
 For your own sanity, use
