@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service:listing xmlns:service="http://x.bmats.co/rest-service/2013.01"
+                 xmlns:rest="http://x.bmats.co/rest/2013.01"
+                 xmlns:meta="http://x.bmats.co/rest-meta/2013.01">
+    <meta:title>Dogecoin service</meta:title>
+    <meta:description>
+        An example Dogecoin service documented with RestML.
+    </meta:description>
+    <meta:license type="Apache 2.0" href="http://www.apache.org/licenses/LICENSE-2.0.html"/>
+    <meta:terms type="Terms of Service" href="http://bmats.co/terms"/>
+    <rest:api id="wow" href="/demo/dogecoin/wow.xml"/>
+    <rest:api id="wallet" href="/demo/dogecoin/wallet.xml"/>
+</service:listing>

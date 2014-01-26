@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rest:api id="wow"
+          baseUrl="http://localhost:4567"
+          version="2.29.5-E"
+          xmlns:rest="http://x.bmats.co/rest/2013.01"
+          xmlns:meta="http://x.bmats.co/rest-meta/2013.01"
+          xmlns:model="http://x.bmats.co/rest-model/2013.01">
+    <meta:title>Wow</meta:title>
+    <meta:subtitle>Such meta</meta:subtitle>
+    <meta:description>Metadata about Dogecoin blockchain</meta:description>
+
+    <rest:group>
+        <meta:title>Status</meta:title>
+        <meta:subtitle>Very current</meta:subtitle>
+
+        <rest:resource id="difficulty" path="/wow/difficulty">
+            <rest:action method="GET">
+                <meta:title>The current difficulty</meta:title>
+                <rest:response status="2xx">
+                    <rest:model ref="status-ok"/>
+                </rest:response>
+            </rest:action>
+        </rest:resource>
+
+        <rest:resource id="currentBlock" path="/wow/current_block">
+            <rest:action method="GET">
+                <meta:title>The current block</meta:title>
+                <rest:response status="2xx">
+                    <rest:model ref="status-ok"/>
+                </rest:response>
+            </rest:action>
+        </rest:resource>
+    </rest:group>
+
+    <rest:group>
+        <meta:title>Exchange</meta:title>
+        <meta:subtitle>Much value</meta:subtitle>
+
+        <rest:resource id="rate" path="/wow/exchange_rate">
+            <rest:action method="GET">
+                <meta:title>Exchange rates</meta:title>
+                <rest:param name="currency" type="query">
+                    <model:restricts value="string"/>
+                </rest:param>
+                <rest:response status="2xx">
+                    <rest:model ref="status-ok"/>
+                </rest:response>
+            </rest:action>
+        </rest:resource>
+    </rest:group>
+
+    <rest:model id="status-ok">
+        <meta:title>OK</meta:title>
+        <meta:description>A generic success message with no extra information.</meta:description>
+        <rest:view contentType="text/plain"/>
+        <rest:view contentType="text/xml"/>
+        <rest:view contentType="application/json"/>
+    </rest:model>
+    <rest:model id="client-error">
+        <meta:title>Error</meta:title>
+        <meta:description>Errors returned by the API have a common base structure</meta:description>
+        <rest:view contentType="text/plain"/>
+        <rest:view contentType="text/csv"/>
+        <rest:view contentType="text/xml"/>
+        <rest:view contentType="application/json"/>
+        <model:extends value="keyed"/>
+        <model:key name="error">
+            <model:restricts value="string"/>
+            <model:enumeration value="InvalidParameter"/>
+        </model:key>
+        <model:key name="reason">
+            <model:restricts value="string"/>
+        </model:key>
+    </rest:model>
+</rest:api>
