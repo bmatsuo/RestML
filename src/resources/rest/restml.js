@@ -6,24 +6,71 @@ rest.js
 This is __free__ software y'all.
 */
 
-var restml = angular.module('restml', []);
+angular.
+    module('concurrency', []).
+    service('$p', ['$q', '$timeout', function($q, $timeout) {
+        var _q = function(fn) {
+            var q = $q.defer();
+            fn(q);
+            return q.promise;
+        };
 
-restml.factory('restSpec', ['$rootScope', '$http', '$q', '$timeout', function($rootScope, $http, $q, $timeout) {
+        var _unit = function(v) {
+            return _q(function(q) {
+                q.resolve(v);
+            });
+        };
+
+        var _async = function(fn) {
+            return _q(function(q) {
+                q.resolve(fn());
+            });
+        };
+
+        var _map = function(p, fn) {
+            return _q(function(q) {
+                p.then(function(x) { q.resolve(fn(x)) }, q.reject);
+            });
+        };
+
+        var _flatmap = function(p, fn) {
+            return _q(function(q) {
+                p.then(function(x) { fn(x).then(q.resolve, q.reject) }, q.reject);
+            });
+        };
+
+        var _map2 = function(p1, p2, fn) {
+            return _q(function(q) {
+                _flatmap(p1, function(x1) {
+                    _map(p2, function(x2) {
+                        return fn(x1, x2);
+                    });
+                });
+            });
+        };
+
+        var _complete = function(q, p) {
+            p.then(q.resolve, q.reject);
+        };
+
+        return {
+            unit: _unit,
+            async: _async,
+            map: _map,
+            flatmap: _flatmap,
+            map2: _flatmap,
+            complete: _complete
+        };
+    }]);
+
+var restml = angular.module('restml', ['concurrency']);
+
+restml.factory('restSpec', ['$rootScope', '$http', '$p', '$q', function($rootScope, $http, $p, $q) {
     var _dom,  // the specification DOM
         _tree; // the specification DOM tree
 
     var _loadXML = function(data) {
-        var q = $q.defer();
-
-        $timeout(function() {
-            try { q.resolve(X.load(data)); }
-            catch(e) {
-                console.error('fuck', e);
-                q.reject(e);
-            }
-        })
-
-        return q.promise;
+        return $p.async(function() { return X.load(data); });
     };
 
     var NS_SERVICE = 'http://x.bmats.co/rest-service/2013.01',
@@ -363,8 +410,8 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', '$timeout', function($r
                 console.log('NOTICE: fetching rest:api "'+id+'"');
                 $http.get(href).
                     success(function(data, status) {
-                        _pflatmap(_loadXML(data), function(xml) {
-                            return _pmap(_buildApi(xml), function(api) { // FIXME i'm losing information here.
+                        $p.flatmap(_loadXML(data), function(xml) {
+                            return $p.map(_buildApi(xml), function(api) { // FIXME i'm losing information here.
                                 if (api.id !== id) {
                                     var msg = 'rest:api at '+href;
                                     msg += ' has id "'+api.id+'"';
@@ -403,36 +450,6 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', '$timeout', function($r
         return terms;
     };
 
-    var _async = function(fn) {
-        return function() {
-            var args = arguments;
-            var q = $q.defer();
-            $timeout(function(){
-                try { q.resolve(fn.apply(this, args)); }
-                catch(e) { console.log('crap:', e); q.reject(e); }
-            });
-            return q.promise;
-        }
-    };
-    var _pmap = function(p, fn) {
-        return _pflatmap(p, _async(fn));
-    };
-    var _pmap2 = function(p1, p2, fn) {
-        return _pflatmap(p1, function(x) {
-            return _pmap(p2, function(y) {
-                return fn(x, y);
-            });
-        })
-    };
-    var _pflatmap = function(p, fn) {
-        var q = $q.defer();
-        p.then(function(x) {
-            try { fn(x).then(q.resolve, q.reject); }
-            catch(e) { q.reject(e); }
-        }, q.reject);
-        return q.promise;
-    };
-
     var _buildService = function(node) {
         var service = {};
         service.title = node.child(NS.Meta('title')).child().text();
@@ -444,7 +461,7 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', '$timeout', function($r
         var apis = node.children(NS.Rest('api'));
         apis = _.map(apis, _buildApi);
         apis = $q.all(apis)
-        return _pmap(apis, function(apis) {
+        return $p.map(apis, function(apis) {
             service.apis = apis;
             return service;
         });
@@ -456,7 +473,8 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', '$timeout', function($r
             throw 'invalid namespace: ' + ns + ' (!= '+ NS_SERVICE +')';
         }
 
-        return _pmap(_buildService(xml), function(service) {
+        var service = _buildService(xml);
+        return $p.map(service, function(service) {
             return {
                 xml: xml,
                 service: service
@@ -468,8 +486,7 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', '$timeout', function($r
         var q = $q.defer();
         $http.get(src).
             success(function(data, status, header) {
-                _pmap(_loadXML(data), _buildSpec).
-                    then(q.resolve, q.reject);
+                $p.complete(q, $p.map(_loadXML(data), _buildSpec));
             }).
             error(function(data, status) {
                 console.log('could not retreive data:', src)
