@@ -6,165 +6,6 @@ rest.js
 This is __free__ software y'all.
 */
 
-var X = function() {
-    var _Node = function(node) {
-        var self = this;
-
-        var _nodeListToArray = function(list) {
-            var a = [];
-            for (var i = 0; i < list.length; i++) {
-                a.push(list.item(i));
-            }
-            return a
-        };
-
-        var _mapNode = function(list, f) {
-            return _.map(_nodeListToArray(list), f)
-        };
-
-        var _filterNode = function(nodeList, predicate) {
-            var filtered = new DOMNodeList(nodeList.ownerDocument, nodeList.parentNode);
-            for (var i = 0; i < nodeList.length; i++) {
-                var node = nodeList.item(i);
-                if (predicate(node)) {
-                    filtered._appendChild(node);
-                }
-            }
-            return filtered
-        };
-
-        var _attr = function() {
-            if (node === null)  return _Node(null);
-
-            var nsuri, local;
-            if (arguments.length === 2) {
-                nsuri = arguments[0];
-                local = arguments[1];
-            } else if (arguments.length === 1) {
-                local = arguments[0];
-            } else {
-                throw 'unexpected number of arguments: ' + arguments.length
-            }
-
-            var a;
-            if (nsuri) {
-                a = node.getAttributeNodeNS(nsuri, local);
-            } else {
-                a = node.getAttributeNode(local);
-            }
-            a = _Node(a);
-
-            return a;
-        };
-
-        var _find = function(filter) {
-            if (node === null)  return _Node(null);
-            throw 'unimplemented';
-        };
-
-        var _first = function(filter) {
-            if (node === null)  return _Node(null);
-            throw 'unimplemented';
-        };
-
-        var _children = function(filter) {
-            var children;
-            if (node === null) {
-                children = [];
-            } else {
-                children = node.getChildNodes();
-                if (typeof filter === 'undefined') {
-                    // noop
-                } else if (typeof filter === 'string') {
-                    children = _filterNode(children, function(child) { return child.localName === filter; });
-                } else {
-                    // duck typing here. is this the right thing to do?
-                    if (typeof filter.ns === 'function' || typeof filter.local === 'function') {
-                        var ns = filter.ns().uri();
-                        var local = filter.local();
-
-                        children = _filterNode(children, function(child) {
-                            return child.namespaceURI.toString() === ns && child.localName === local;
-                        });
-                    } else if (typeof filter.uri === 'function') {
-                        var ns = filter.uri();
-                        children = _filterNode(children, function(child) {
-                            return child.namespaceURI.toString() === ns;
-                        });
-                    }
-                }
-                children = _mapNode(children, function(child) { return _Node(child) });
-            }
-            children.head = function() {
-                if (children.length === 0) {
-                    return X.Node(null);
-                }
-                return children[0];
-            };
-            return children;
-        };
-
-        // TODO moar efficiency. remove the head() method.
-        var _firstChild = function(filter) { return _children(filter).head(); };
-
-        var _ns = function() {
-            if (node === null) return null;
-            var ns = node.namespaceURI.toString();
-            if (ns) return null;
-            return NS(ns);
-        };
-
-        var _local = function() {
-            if (node === null) return null;
-            return node.localName;
-        };
-
-        var _text = function() {
-            if (node === null) return null;
-
-            return node.nodeValue.toString();
-        };
-        var _int = function() { return parseInt(_text()); };
-        var _float = function() { return parseFloat(_text()); };
-        var _bool = function() {
-            var t = _text();
-            if (t === 'true') return true;
-            if (t === 'false') return false;
-            return null;
-        };
-
-        return {
-            attr: _attr,
-            children: _children,
-            child: _firstChild,
-            text: _text,
-            int: _int,
-            float: _float,
-            bool: _bool,
-            ns: _ns,
-            local: _local,
-            node: function() { return node; }
-        };
-    };
-
-    var _NS = function(uri) {
-        var self = function(local) {
-            return {
-                ns: function() { return _NS(uri); },
-                local: function() { return local; },
-                toString: function() { return '{' + uri + '}:' + local }
-            };
-        };
-        self.uri = function() { return uri; };
-        return self;
-    };
-
-    return {
-        Node: _Node,
-        NS: _NS
-    };
-}()
-
 var restml = angular.module('restml', []);
 
 restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $http, $q) {
@@ -657,7 +498,7 @@ restml.factory('restSpec', ['$rootScope', '$http', '$q', function($rootScope, $h
     };
 }]);
 
-restml.directive('restApi', ['restSpec', function(restSpec) {
+restml.directive('restApi', [function() {
     return {
         template: '<div class="rest-api" ng-transclude></div>',
         restrict: "E",
@@ -745,7 +586,8 @@ restml.directive('restDocs3', [function() {
         }
     };
 }]);
-restml.directive('restSubmit', ['restSpec', function(restSpec) {
+
+restml.directive('restSubmit', [ function() {
     return {
         template: '<button type="submit" class="rest-submit" ng-transclude></button>',
         restrict: "E",
@@ -812,7 +654,7 @@ restml.directive('rest', ['restSpec', function(restSpec) {
     };
 }]);
 
-restml.directive('restAction', ['$timeout','$http', 'restSpec', function($timeout, $http, $httpProvider, restSpec) {
+restml.directive('restAction', ['$timeout','$http', function($timeout, $http, $httpProvider) {
     var template = '';
     template += '<div class="rest-action">';
     template += '<form ng-submit="submit(config)" ng-transclude></form>';
@@ -1178,7 +1020,7 @@ restml.directive('restDemoResponseBody', function() {
     };
 });
 
-restml.directive('restParamInput', ['restSpec', function(restSpec) {
+restml.directive('restParamInput', [function() {
     var template = '';
     template += '<div class="rest-param">';
     template += '<input';
@@ -1210,7 +1052,7 @@ restml.directive('restParamInput', ['restSpec', function(restSpec) {
     }
 }])
 
-restml.directive('restParamLabel', ['restSpec', function(restSpec) {
+restml.directive('restParamLabel', [function() {
     var template = '';
     template += '<label';
     template += ' for="rest-param-{{api}}-{{method}}-{{resource}}-{{name}}"';
@@ -1232,7 +1074,7 @@ restml.directive('restParamLabel', ['restSpec', function(restSpec) {
 }])
 
 // idk wtf is going on here.
-restml.directive('restParamName', ['restSpec', function(restSpec) {
+restml.directive('restParamName', [function() {
     var template = 'param.name';
 
     return {
@@ -1244,7 +1086,7 @@ restml.directive('restParamName', ['restSpec', function(restSpec) {
     }
 }])
 
-restml.directive('restContentTypeSelect', ['restSpec', function() {
+restml.directive('restContentTypeSelect', [function() {
     var template = '';
     template += '<select';
     template += ' id="rest-content-type-{{api}}-{{method}}-{{resource}}"';
@@ -1277,7 +1119,7 @@ restml.directive('restContentTypeSelect', ['restSpec', function() {
     }
 }]);
 
-restml.directive('restContentTypeLabel', ['restSpec', function(restSpec) {
+restml.directive('restContentTypeLabel', [function() {
     var template = '';
     template += '<label';
     template += ' for="rest-content-type-{{api}}-{{method}}-{{resource}}"';
@@ -1298,7 +1140,7 @@ restml.directive('restContentTypeLabel', ['restSpec', function(restSpec) {
     }
 }])
 
-restml.directive('restAcceptSelect', ['restSpec', function() {
+restml.directive('restAcceptSelect', [function() {
     var template = '';
     template += '<select';
     template += ' id="rest-accept-{{api}}-{{method}}-{{resource}}"';
@@ -1332,7 +1174,7 @@ restml.directive('restAcceptSelect', ['restSpec', function() {
     }
 }]);
 
-restml.directive('restAcceptLabel', ['restSpec', function(restSpec) {
+restml.directive('restAcceptLabel', [function() {
     var template = '';
     template += '<label';
     template += ' for="rest-accept-{{api}}-{{method}}-{{resource}}"';
@@ -1353,7 +1195,7 @@ restml.directive('restAcceptLabel', ['restSpec', function(restSpec) {
     }
 }])
 
-restml.directive('restSelect', ['restSpec', function(restSpec) {
+restml.directive('restSelect', [function() {
     var template = '';
     template += '<div class="restml service-selection">';
     template += '<input type="text" ng-model="textInput">';
