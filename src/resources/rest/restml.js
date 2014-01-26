@@ -419,7 +419,7 @@ restml.directive('restDocs1', [function() {
         replace: true,
         transclude: true,
         scope: {
-            obj: '='
+            obj: '=for'
         },
         link: function(scope, element) {
             var _setObj = function(obj) {
@@ -445,7 +445,7 @@ restml.directive('restDocs2', [function() {
         replace: true,
         transclude: true,
         scope: {
-            obj: '='
+            obj: '=for'
         },
         link: function(scope, element) {
             var _setObj = function(obj) {
@@ -471,7 +471,7 @@ restml.directive('restDocs3', [function() {
         replace: true,
         transclude: true,
         scope: {
-            obj: '='
+            obj: '=for'
         },
         link: function(scope, element) {
             var _setObj = function(obj) {

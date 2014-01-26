@@ -11,13 +11,13 @@
         <rest-select src="'/demo/service.xml'" on-select="selected(serviceUrl)"></rest-select>
 
         <rest src="src" on-load="serviceLoaded(service)" ng-cloak>
-            <rest-docs1 obj="service"></rest-docs1>
+            <rest-docs1 for="service"></rest-docs1>
 
             <rest-api ng-repeat="api in service.apis">
-                <rest-docs2 obj="api"></rest-docs2>
+                <rest-docs2 for="api"></rest-docs2>
 
                 <div ng-repeat="group in api.groups">
-                    <rest-docs3 obj="group"></rest-docs3>
+                    <rest-docs3 for="group"></rest-docs3>
 
                     <div ng-repeat="resource in group.resources">
                         <rest-action ng-repeat="action in resource.actions"
@@ -97,7 +97,6 @@
                                         </td>
                                         <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
                                             <div class="content-type-specification">
-                                                <!-- TODO use a directive to add the rest-action-accept class -->
                                                 <rest-content-type-select class="form-control"></rest-content-type-select>
                                             </div>
                                         </td>
@@ -110,7 +109,6 @@
                                         </td>
                                         <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
                                             <div class="accept-specification">
-                                                <!-- TODO use a directive to add the rest-action-accept class -->
                                                 <rest-accept-select class="form-control"></rest-accept-select>
                                             </div>
                                         </td>
